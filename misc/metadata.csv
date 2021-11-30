@@ -1,0 +1,163 @@
+library,codename,treat,dose,duration,mouse,serum_term,description
+YT013101,S02,Saline,0g,6h,59,Not_added,Saline 6h
+YT013102,L02,LPS,50mg,6h,58,Not_added,LPS 50mg/kg 6h
+YT013103,P01,Poly(i:c),20mg,6h,57,Not_added,Poly I:C 20mg/kg 6h
+YT032201-02,S01,Saline,0g,6h,56,Not_added,Saline 6h
+YT032202-02,L01,LPS,50mg,6h,55,Not_added,LPS 50mg/kg 6h
+YT032203,P02,Poly(i:c),20mg,6h,54,Not_added,Poly I:C 20mg/kg 6h
+YT040401,S03,Saline,0g,3h,48,Not_added,Saline 3h
+YT040402,S04,Saline,0g,3h,48,Not_added,Saline 3h
+YT040403,P03,Poly(i:c),20mg,3h,46,Not_added,Poly I:C 20mg/kg 3h
+YT040404,P04,Poly(i:c),20mg,3h,46,Not_added,Poly I:C 20mg/kg 3h
+YT040405,P05,Poly(i:c),10mg,6h,47,Not_added,Poly I:C 10mg/kg 6h
+YT040406-2,L03,LPS,50mg,3h,49,Not_added,LPS 50mg/kg 3h
+YT041101,L04,LPS,50mg,3h,49,Not_added,LPS 50mg/kg 3h
+YT041102,L05,LPS,10mg,6h,45,Not_added,LPS 10mg/kg 6h
+YT041103,L06,LPS,10mg,6h,45,Not_added,LPS 10mg/kg 6h
+YT041104,L07,LPS,10mg,3h,1,Not_added,LPS 10mg/kg 3h
+YT041105,L08,LPS,10mg,3h,1,Not_added,LPS 10mg/kg 3h
+YT041106,P06,Poly(i:c),10mg,6h,47,Not_added,Poly I:C 10mg/kg 6h
+YT041107,P07,Poly(i:c),10mg,3h,2,Not_added,Poly I:C 10mg/kg 3h
+YT041108,P08,Poly(i:c),10mg,3h,2,Not_added,Poly I:C 10mg/kg 3h
+YT042501,P09,Poly(i:c),10mg,3h,5,Not_added,Poly I:C 10mg/kg 3h
+YT042502,P10,Poly(i:c),10mg,3h,5,Not_added,Poly I:C 10mg/kg 3h
+YT042503,P11,Poly(i:c),20mg,3h,4,Not_added,Poly I:C 20mg/kg 3h
+YT042504,P12,Poly(i:c),20mg,3h,4,Not_added,Poly I:C 20mg/kg 3h
+YT042505,L09,LPS,10mg,3h,6,Not_added,LPS 10mg/kg 3h
+YT042506,L10,LPS,10mg,3h,6,Not_added,LPS 10mg/kg 3h
+YT042507,L11,LPS,10mg,6h,7,Not_added,LPS 10mg/kg 6h
+YT042701,T01,TNFalpha,500ug,6h,13,Not_added,TNFa 500ug/kg 6h
+YT042702,T02,TNFalpha,500ug,6h,13,Not_added,TNFa 500ug/kg 6h
+YT042703,T03,TNFalpha,500ug,6h,14,Not_added,TNFa 500ug/kg 6h
+YT042704,T04,TNFalpha,500ug,6h,14,Not_added,TNFa 500ug/kg 6h
+YT042705,S05,Saline,0g,3h,3,Not_added,Saline 3h
+YT042706,S06,Saline,0g,3h,3,Not_added,Saline 3h
+YT042707,S07,Saline,0g,6h,8,Not_added,Saline 6h
+YT042708,S08,Saline,0g,6h,8,Not_added,Saline 6h
+YT042709,L12,LPS,10mg,6h,7,Not_added,LPS 10mg/kg 6h
+YT050901,L13,LPS,50mg,3h,9,Not_added,LPS 50mg/kg 3h
+YT050902,L14,LPS,50mg,3h,9,Not_added,LPS 50mg/kg 3h
+YT050903,L15,LPS,50mg,6h,10,Not_added,LPS 50mg/kg 6h
+YT050904,L16,LPS,50mg,6h,10,Not_added,LPS 50mg/kg 6h
+YT050905,P13,Poly(i:c),20mg,6h,11,Not_added,Poly I:C 20mg/kg 6h
+YT050906,P14,Poly(i:c),20mg,6h,11,Not_added,Poly I:C 20mg/kg 6h
+YT050907,P15,Poly(i:c),10mg,6h,12,Not_added,Poly I:C 10mg/kg 6h
+YT050908,P16,Poly(i:c),10mg,6h,12,Not_added,Poly I:C 10mg/kg 6h
+YT081601,S09,Saline,0g,6h,17,Not_added,Saline 6h
+YT081602,S10,Saline,0g,6h,17,Not_added,Saline 6h
+YT081603,S11,Saline,0g,6h,53,Not_added,Saline 6h
+YT081604,S12,Saline,0g,6h,53,Not_added,Saline 6h
+YT081605,S13,Saline,0g,6h,53,Not_added,Saline 6h
+YT081606,L17,LPS,500ug,6h,15,Not_added,LPS 500ug/kg 6h
+YT081607,L18,LPS,500ug,6h,15,Not_added,LPS 500ug/kg 6h
+YT081608,L19,LPS,50mg,6h,16,Not_added,LPS 50mg/kg 6h
+YT081609,L20,LPS,50mg,6h,16,Not_added,LPS 50mg/kg 6h
+YT081610,L21,LPS,50mg,3h,50,Not_added,LPS 50mg/kg 3h
+YT081611,L22,LPS,50mg,3h,50,Not_added,LPS 50mg/kg 3h
+YT081612,L23,LPS,50mg,6h,51,Not_added,LPS 50mg/kg 6h
+YT081613,L24,LPS,10mg,3h,52,Not_added,LPS 10mg/kg 3h
+YT081614,L25,LPS,10mg,3h,52,Not_added,LPS 10mg/kg 3h
+YT081615,L26,LPS,10mg,3h,52,Not_added,LPS 10mg/kg 3h
+YT101001,MC1,CNO,2mg,1d,18,Not_added,CRH-Cre PVH mCherry CNO 2mg/kg 1d
+YT101002,MC2,CNO,2mg,1d,18,Not_added,CRH-Cre PVH mCherry CNO 2mg/kg 1d
+YT101003,MC3,CNO,2mg,1d,18,Not_added,CRH-Cre PVH mCherry CNO 2mg/kg 1d
+YT101004,3Q1,CNO,2mg,1d,19,Not_added,CRH-Cre PVH 3q CNO 2mg/kg 1d
+YT101005,3Q2,CNO,2mg,1d,19,Not_added,CRH-Cre PVH 3q CNO 2mg/kg 1d
+YT101006,3Q3,CNO,2mg,1d,20,Not_added,CRH-Cre PVH 3q CNO 2mg/kg 1d
+YT101007,3Q4,CNO,2mg,3d,21,Not_added,CRH-Cre PVH 3q CNO 2mg/kg 3d
+YT101008,3Q5,CNO,2mg,3d,21,Not_added,CRH-Cre PVH 3q CNO 2mg/kg 3d
+YT101009,3Q6,CNO,2mg,3d,21,Not_added,CRH-Cre PVH 3q CNO 2mg/kg 3d
+YT101010,L27,LPS,500ug,4w,41,Not_added,LPS 500ug/kg 4w
+YT101011,L28,LPS,1mg,3w,40,Not_added,LPS 1mg/kg 3w
+YT101012,L29,LPS,500ug,3w,42,Not_added,LPS 500ug/kg 3w
+YT101013,P18,Poly(i:c),20mg,5w,39,Not_added,Poly I:C 20mg/kg 5w
+YT101014,P19,Poly(i:c),20mg,5w,39,Not_added,Poly I:C 20mg/kg 5w
+YT101015,R01,RS,0g,2w,23,Not_added,CRS 14d
+YT101017,P20,Poly(i:c),20mg,8w,37,Not_added,Poly I:C 20mg/kg 8w
+YT101018,P21,Poly(i:c),20mg,3w,38,Not_added,Poly I:C 20mg/kg 3w
+YT101019,P22,Poly(i:c),20mg,3w,38,Not_added,Poly I:C 20mg/kg 3w
+YT101020,P17,Poly(i:c),20mg,5w,39,Not_added,Poly I:C 20mg/kg 5w
+YT101021,L30,LPS,1mg,3w,40,Not_added,LPS 1mg/kg 3w
+YT101022,L31,LPS,500ug,4w,41,Not_added,LPS 500ug/kg 4w
+YT101023,L32,LPS,500ug,5w,43,Not_added,LPS 500ug/kg 5w
+YT101024,L33,LPS,500ug,5w,43,Not_added,LPS 500ug/kg 5w
+YT101025,3Q7,CNO,2mg,3d,22,Not_added,CRH-Cre PVH 3q CNO 2mg/kg 3days
+YT101026,3Q8,CNO,2mg,3d,22,Not_added,CRH-Cre PVH 3q CNO 2mg/kg 3days
+YT101027,3Q9,CNO,2mg,3d,22,Not_added,CRH-Cre PVH 3q CNO 2mg/kg 3days
+YT101028,R02,RS,0g,2w,23,Not_added,CRS 14d
+YT101033,R03,RS,0g,2w,24,Not_added,CRS 14d
+YT101034,R04,RS,0g,2w,24,Not_added,CRS 14d
+YT101035,L34,LPS,500ug,3w,42,Not_added,LPS 500ug/kg 3w
+YT101036,L35,LPS,500ug,5w,44,Not_added,LPS 500ug/kg 5w
+YT101037,L36,LPS,500ug,5w,44,Not_added,LPS 500ug/kg 5w
+YT19021504,T06,TNFalpha,500ug,6h,34,Not_added,56-88 TNF-a 500ug/kg 6h ;89-94 3T3 cells
+YT19021505,R05,RS,0g,3h,36,Not_added,restraint 3h
+YT19021506,R06,RS,0g,3h,36,Not_added,restraint 3h
+YT19021507,R07,RS,0g,3h,36,Not_added,restraint 3h
+YT19021508,T05,TNFalpha,500ug,6h,34,Not_added,TNF-a 500ug/kg 6h 
+YT19021509,T07,TNFalpha,500ug,6h,35,Not_added,TNF-a 500ug/kg 6h 
+YT19021510,T08,TNFalpha,500ug,6h,35,Not_added,TNF-a 500ug/kg 6h 
+YT19021511,L37,LPS,500ug,3h,33,Not_added,LPS 500ug/kg 3h
+YT19021512,L38,LPS,500ug,3h,33,Not_added,LPS 500ug/kg 3h
+YT19021513,L39,LPS,500ug,3h,32,Not_added,LPS 500ug/kg 3h
+YT19021514,L40,LPS,500ug,3h,32,Not_added,LPS 500ug/kg 3h
+YT19021515,L41,LPS,500ug,6h,31,Not_added,LPS 500ug/kg 6h
+YT19021516,L42,LPS,500ug,6h,31,Not_added,LPS 500ug/kg 6h
+YT19021517,L43,LPS,500ug,6h,30,Not_added,LPS 500ug/kg 6h
+YT19021518,L44,LPS,500ug,2d,29,Not_added,LPS 500ug/kg 48h
+YT19021519,L45,LPS,500ug,2d,29,Not_added,LPS 500ug/kg 48h
+YT19021520,L46,LPS,500ug,2d,29,Not_added,LPS 500ug/kg 48h
+YT19070301,L60,LPS,500ug,1d,25,Not_added,LPS 500ug/kg 24h
+YT19070302,L61,LPS,500ug,1d,25,Not_added,LPS 500ug/kg 24h
+YT19070303,L62,LPS,500ug,1d,25,Not_added,LPS 500ug/kg 24h
+YT19070304,L63,LPS,500ug,2d,26,Not_added,LPS 500ug/kg 48h
+YT19070305,L64,LPS,500ug,2d,26,Not_added,LPS 500ug/kg 48h
+YT19070306,L65,LPS,500ug,2d,26,Not_added,LPS 500ug/kg 48h
+YT19070307,L66,LPS,500ug,2d,26,Not_added,LPS 500ug/kg 48h
+YT19070308,L67,LPS,500ug,1d,27,Not_added,LPS 500ug/kg 24h
+YT19070309,L68,LPS,500ug,1d,27,Not_added,LPS 500ug/kg 24h
+YT19070310,L69,LPS,500ug,1d,27,Not_added,LPS 500ug/kg 24h
+YT19070311,L70,LPS,500ug,1d,27,Not_added,LPS 500ug/kg 24h
+YT19070312,L71,LPS,500ug,1d,27,Not_added,LPS 500ug/kg 24h
+YT19070313,L72,LPS,500ug,1d,27,Not_added,LPS 500ug/kg 24h
+YT19070314,L73,LPS,500ug,1d,27,Not_added,LPS 500ug/kg 24h
+YT19070315,L74,LPS,500ug,1d,27,Not_added,LPS 500ug/kg 24h
+YT19070316,L75,LPS,500ug,2d,28,Not_added,LPS 500ug/kg 48h
+YT19070317,L76,LPS,500ug,2d,28,Not_added,LPS 500ug/kg 48h
+YT19070318,L77,LPS,500ug,2d,28,Not_added,LPS 500ug/kg 48h
+YT19070319,L78,LPS,500ug,2d,28,Not_added,LPS 500ug/kg 48h
+YT191220-L79,L79,LPS,10mg,6h,60,Not_added,LPS 10mg/kg 6h
+YT191220-L80,L80,LPS,10mg,6h,60,Not_added,LPS 10mg/kg 6h
+YT191220-L81,L81,LPS,10mg,6h,60,Not_added,LPS 10mg/kg 6h
+YT191220-L82,L82,LPS,10mg,6h,60,Not_added,LPS 10mg/kg 6h
+YT191220-L83,L83,LPS,10mg,6h,60,Not_added,LPS 10mg/kg 6h
+YT191220-L84,L84,LPS,10mg,3h,61,Added,LPS 10mg/kg 3h
+YT191220-L85,L85,LPS,10mg,3h,61,Added,LPS 10mg/kg 3h
+YT191220-L86,L86,LPS,500ug,3h,62,Added,LPS 500ug/kg 3h
+YT191220-L87,L87,LPS,500ug,3h,62,Added,LPS 500ug/kg 3h
+YT191220-L88,L88,LPS,500ug,3h,62,Added,LPS 500ug/kg 3h
+YT191220-L89,L89,LPS,500ug,6h,63,Added,LPS 500ug/kg 6h
+YT191220-L90,L90,LPS,500ug,6h,63,Added,LPS 500ug/kg 6h
+YT191220-L91,L91,LPS,500ug,6h,63,Added,LPS 500ug/kg 6h
+YT191220-S10,S14,Saline,0g,3h,66,Not_added,Saline 3h
+YT191220-S11,S15,Saline,0g,3h,66,Not_added,Saline 3h
+YT191220-S12,S16,Saline,0g,3h,66,Not_added,Saline 3h
+YT191220-S13,S17,Saline,0g,3h,66,Not_added,Saline 3h
+YT191220-S14,S18,Saline,0g,3h,66,Not_added,Saline 3h
+YT191226-L92,L92,LPS,50mg,3h,64,Added,LPS 50mg/kg 3h
+YT191226-L93,L93,LPS,50mg,3h,64,Added,LPS 50mg/kg 3h
+YT191226-L94,L94,LPS,50mg,3h,64,Added,LPS 50mg/kg 3h
+YT191226-L95,L95,LPS,50mg,3h,64,Added,LPS 50mg/kg 3h
+YT191226-L96,L96,LPS,50mg,6h,65,Added,LPS 50mg/kg 6h
+YT191226-L97,L97,LPS,50mg,6h,65,Added,LPS 50mg/kg 6h
+YT191226-L98,L98,LPS,50mg,6h,65,Added,LPS 50mg/kg 6h
+YT191226-L99,L99,LPS,50mg,6h,65,Added,LPS 50mg/kg 6h
+YT191226-S15,S19,Saline,0g,6h,67,Added,Saline 6h
+YT191226-S16,S20,Saline,0g,6h,67,Added,Saline 6h
+YT191226-S17,S21,Saline,0g,6h,67,Added,Saline 6h
+YT200111-L100,L100,LPS,500ug,6h,68,Not_added,LPS 500ug/kg 6h
+YT200111-L101,L101,LPS,500ug,6h,68,Not_added,LPS 500ug/kg 6h
+YT200111-L102,L102,LPS,500ug,6h,68,Not_added,LPS 500ug/kg 6h
+YT200111-L103,L103,LPS,500ug,3h,69,Not_added,LPS 500ug/kg 3h
+YT200111-L104,L104,LPS,500ug,3h,69,Not_added,LPS 500ug/kg 3h
+YT200111-L105,L105,LPS,500ug,3h,69,Not_added,LPS 500ug/kg 3h

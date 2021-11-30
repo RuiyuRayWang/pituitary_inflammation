@@ -1,0 +1,128 @@
+---
+title: "Cell Type Classification Based on Marker Genes"
+author: "Ruiyu Ray Wang"
+date: "6/9/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# work_space = "luolab"
+# work_space = "rayhome"
+work_space = "mac"
+
+if ( work_space == "luolab" ){
+  wd = '/media/luolab/ZA1BT1ER/yanting/vM21'
+} else if (work_space == "rayhome" ){
+  wd = 'D:/scRNAseq/yanting/vM21'
+} else if (work_space == "mac"){
+  wd = '/Users/Ray/Documents/Work/scRNAseq/yanting/pituitary_scRNAseq_analysis'
+}
+rm(work_space)
+knitr::opts_knit$set(root.dir = wd)
+```
+
+## Initialization
+
+```{r}
+library(Seurat)
+library(cellassign)
+library(scran)
+library(pheatmap)
+```
+
+
+```{r init}
+# genename = "stable_id"
+genename = "short"
+
+if (genename=="stable_id"){
+  cells.sce <- readRDS(file.path(wd,'QC',"cells.sce_stable_id.rds"))
+} else if (genename=="short"){
+  cells.sce <- readRDS(file.path(wd,'QC',"cells.sce_short.rds"))
+}
+```
+
+## Using CellAssign to assign cells to known types
+
+First we examine putative cell markers proposed by Cheung, et al (2018), Fletcher, et al (2019), Ho, et al (2020), and Chen, et al (2020).
+
+```{r include=FALSE}
+# Somatotropes
+FeaturePlot(cells.seurat, features = c("Rxrg","Pappa2","Gnmt","Ceacam10","Uchl1","Resp18","Chgb","Scg2","Gh","Ghrhr"))
+
+# Lactotropes.
+FeaturePlot(cells.seurat, features = c("Agtr1b","Agtr1a","Gria2","Grik2","Grik5","Ddx5","Ddx17","Drd2","Nr4a1","Nr4a2","Angpt1","Prl"))  # Agtr1b was identified in rat, and it doesn't express much in mice data.
+FeaturePlot(cells.seurat, features = c("Syndig1","Edil3","Hepacam2","Cilp","Akr1c14","Gpr83","Krt25","Asic4","Irx6","Klk1b3","Angpt1","Prl"))
+
+# White blood cells
+FeaturePlot(cells.seurat, features = c("C1qa","Ctss","Col1a1","Lum","Dcn","Adgre1","Itgam","Cd53","Tyrobp","Fcer1g","Laptm5"))  # The neurohypophysis is a neural tissue after all, so it's not surprising to have microglia in it. Cx3cr1 expressed in a subpopulation of C1qa+ cells, and mostly concentrated in immune stimulated groups, possibly reflecting biased sampling in cell collection procedure (YT only picks cells that look nice and round). For the sake of simplicity, we incorporate Cx3cr1+ cells into the 'white blood cells' master type. Pow, et al (1989) suggested that neurohypophysial microglia display a pericapillary position, which reminds me of the morphological features of pericytes, thus several pericytes' markers suggested by Fletcher, et al. (2019) were also examined here. We can see from their gene expression profiles that microglia and pericyte are two different population of cells.
+
+# Folliculostellate cells
+FeaturePlot(cells.seurat, features = c("S100b","Fxyd1","Gstm2","Capn6","Hey1","Hey2","Heyl","Wnt5a","Prrx1","Rarres2","Cxcl12","Edn3"))
+FeaturePlot(cells.seurat, features = c("Gpha2","Mdk","Aldh1a2","Aldh1a7","Aldh3a1","Gsta4","Gstm2","Gstm6","Gstt3","Itih5","Col1a1","Sox9"))
+FeaturePlot(cells.seurat, features = c("Pdgfrb","Ogn","Lum","Dcn"))
+
+#`Stem cells` = c("Sox2","Aldh3a1","Aldh1a2","Cyp2f2","Lcn2","Mia","Cpxm2","Rbpms","Cdh26","Aqp3","Aqp4")
+```
+
+https://kieranrcampbell.github.io/r-workshop-march-2019/
+
+```{r pressure, echo=FALSE}
+pituitary_marker_list <- list(
+  Somatotropes = c("Gh","Ghrhr","Chgb","Scg2"),
+  Lactotropes = c("Prl","Angpt1","Chgb","Scg2"),
+  Corticotropes = c("Pomc","Crhr1","Tbx19","Chgb","Scg2"),
+  Melanotropes = c("Pomc","Tbx19","Pax7","Pcsk2","Rbfox3","Chgb","Scg2"),
+  Gonadotropes = c("Fshb","Lhb","Gnrhr","Cga","Chgb","Scg2"),
+  Thyrotropes = c("Tshb","Trhr","Cga","Chgb","Scg2"),
+  `Pou1f1 Progenitors` = c("Pbk","Top2a","Mki67"),
+  `Red blood cells` = c("Hbb-bt","Hbb-bs"),
+  `White blood cells` = c("C1qa","Ctss"), 
+  `Folliculostellate cells` = c("S100b","Fxyd1"),
+  `Endothelial cells` = c("Pecam1","Emcn","Plvap"),
+  `Pituicyte` = c("Gja1","Scn7a","Col25a1"),
+  `Pericytes` = c("Col1a1","Dcn","Ogn","Lum","Pdgfrb"),
+  `Stem cells` = c("Sox2","Aldh3a1","Aldh1a2","Cyp2f2")
+)
+mks <- marker_list_to_mat(pituitary_marker_list, include_other = FALSE)
+pheatmap(mks)
+```
+
+Making sure that the markers exist in the SingleCellExperiment object.
+
+```{r}
+rowData(cells.sce)$Symbol <- rownames(rowData(cells.sce))
+marker_in_sce <- match(rownames(mks), rowData(cells.sce)$Symbol)
+stopifnot(all(!is.na(marker_in_sce)))
+```
+
+And finally we subset `sce` object to just the marker genes.
+
+```{r}
+sce_marker <- cells.sce[marker_in_sce, ]
+stopifnot(all.equal(rownames(mks), rowData(sce_marker)$Symbol))
+```
+
+We then call `cellassign` passing in the `SingleCellExperiment`, marker info, the size factors we’ve calculated, as well as various other options:
+
+```{r}
+counts(sce_marker) <- as.matrix(counts(sce_marker))
+print(dim(sce_marker))
+print(dim(mks))
+```
+
+```{r}
+fit <- cellassign(
+  exprs_obj = sce_marker,
+  marker_gene_info = mks,
+  # s = sizeFactors(cells.sce),
+  shrinkage = TRUE,
+  max_iter_adam = 50,
+  min_delta = 2,
+  verbose = TRUE
+)
+```
+
+

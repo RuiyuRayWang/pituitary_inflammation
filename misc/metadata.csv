@@ -161,3 +161,12 @@ YT200111-L102,L102,LPS,500ug,6h,68,Not_added,LPS 500ug/kg 6h
 YT200111-L103,L103,LPS,500ug,3h,69,Not_added,LPS 500ug/kg 3h
 YT200111-L104,L104,LPS,500ug,3h,69,Not_added,LPS 500ug/kg 3h
 YT200111-L105,L105,LPS,500ug,3h,69,Not_added,LPS 500ug/kg 3h
+yt-NH-S1,NHS1,Saline,0g,6h,70,Added,Saline 6h Neurohypophysis
+yt-NH-S2,NHS2,Saline,0g,6h,70,Added,Saline 6h Neurohypophysis
+yt-NH-S3,NHS3,Saline,0g,6h,71,Added,Saline 6h Neurohypophysis
+yt-NH-L1,NHL1,LPS,500ug,6h,72,Added,LPS 500ug/kg 6h Neurohypophysis
+yt-NH-L2,NHL2,LPS,500ug,6h,72,Added,LPS 500ug/kg 6h Neurohypophysis
+yt-NH-L3,NHL3,LPS,500ug,6h,72,Added,LPS 500ug/kg 6h Neurohypophysis
+yt-NH-L4,NHL4,LPS,10mg,6h,73,Added,LPS 10mg/kg 6h Neurohypophysis
+yt-NH-L5,NHL5,LPS,10mg,6h,73,Added,LPS 10mg/kg 6h Neurohypophysis
+yt-NH-L6,NHL6,LPS,10mg,6h,73,Added,LPS 10mg/kg 6h Neurohypophysis

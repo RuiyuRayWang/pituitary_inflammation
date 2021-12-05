@@ -1,32 +1,55 @@
-library(Seurat)
+# ## Installation instructions
+# 
+# ## Build multiple R versions: https://ruiyuraywang.github.io/post/mult-r/ and switch to R-3.6.2
+# 
+# ## Install some package dependencies
+# install.packages("reticulate")
+# install.packages("devtools")
+# install.packages("BiocManager")
+# install.packages("Seurat")
+# BiocManager::install("SingleCellExperiment")
+# BiocManager::install("splatter")
+# devtools::install_github("erichson/rsvd@v1.0.0")
+# BiocManager::install("BiocSingular")
+# devtools::install_version("RcppAnnoy", "0.0.16", repos="http://cran.us.r-project.org")
+# BiocManager::install("BiocNeighbors", version="3.10")
+# BiocManager::install("scater")
+# BiocManager::install("scran")
+# 
+# ## Create dedicated environment in shell
+# # conda create -n cellassign python=3.7
+# 
+# ## Setup environment to use
+# Sys.setenv(RETICULATE_PYTHON="/home/luolab/miniconda3/envs/cellassign/bin/python")
+# library(reticulate)
+# reticulate::use_condaenv("cellassign")
+# 
+# ## Build core packages for cellassign
+# 
+# ## Install tensorflow
+# ## NOT DO! Use devtools and build tensorflow from shell!
+# # install.packages("tensorflow")
+# # tensorflow::install_tensorflow(extra_packages="tensorflow-probability", version = "2.1.0")
+# devtools::install_github("rstudio/tensorflow@v2.4.0")
+# 
+# ## In shell, activate conda environment `cellassign` and do
+# # $ pip install tensorflow==2.4.0
+# # $ pip install tensorflow-probability==0.12.0
+# # $ pip install tensorflow-gpu==2.4.0
+# 
+# ## Install cellassign
+# devtools::install_github("Irrationone/cellassign")
+
+## Run pipe
 library(SingleCellExperiment)
 
-
-Sys.setenv(RETICULATE_PYTHON="/home/luolab/miniconda3/envs/r-reticulate/bin/python")
-Sys.setenv(LD_LIBRARY_PATH=
-             paste0("/usr/local/cuda/extras/CUPTI:/usr/local/lib:/usr/local/cuda/lib64:/home/luolab/u-net/lib:/home/unetuser/u-net/extlib:",
-                    Sys.getenv("LD_LIBRARY_PATH")))
 library(tensorflow)
-library(reticulate)
-# Sys.getenv()
+tensorflow::tf_config()  # Make sure tensorflow is installed properly
+
 library(cellassign)
-tensorflow::tf_config()
 
-
-library(SingleCellExperiment)
-data(example_sce)
-data(example_marker_mat)
-s <- sizeFactors(example_sce)
-fit <- cellassign(exprs_obj = example_sce[rownames(example_marker_mat),],
-                  marker_gene_info = example_marker_mat,
-                  s = s,
-                  learning_rate = 1e-2, 
-                  shrinkage = TRUE,
-                  verbose = FALSE)
-
-
-cells <- readRDS("data/cells_pre.rds")
-cells.sce <- as.SingleCellExperiment(cells)
+cells.sce <- readRDS("data/cells.sce.rds")
+s <- cells.sce$sizeFactor
 
 # Parse marker list
 pituitary_marker_list <- list(
@@ -66,9 +89,11 @@ print(dim(mks))
 fit <- cellassign(
   exprs_obj = sce_marker,
   marker_gene_info = mks,
-  s = sizeFactors(cells.sce),
+  s = s,
   shrinkage = TRUE,
   max_iter_adam = 50,
   min_delta = 2,
   verbose = TRUE
 )
+
+saveRDS(fit, file = "data/fit_cellassign_20211205.rds")

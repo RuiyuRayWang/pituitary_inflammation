@@ -79,4 +79,4 @@ cells.new <- RenameIdents(cells.new,
                           'Poly(i:c) 20mg 8w' = 'Poly(i:c) >3w')
 cells.new[["stim"]] <- Idents(cells.new)
 
-saveRDS(cells.new, 'data/cells_pre.rds')
+saveRDS(cells.new, 'data/cells.rds')

@@ -1,32 +1,20 @@
 ---
 title: "Cell Type Classification Based on Marker Genes"
 author: "Ruiyu Ray Wang"
-date: "6/9/2020"
+date: "`r Sys.Date()`"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
-# work_space = "luolab"
-# work_space = "rayhome"
-work_space = "mac"
-
-if ( work_space == "luolab" ){
-  wd = '/media/luolab/ZA1BT1ER/yanting/vM21'
-} else if (work_space == "rayhome" ){
-  wd = 'D:/scRNAseq/yanting/vM21'
-} else if (work_space == "mac"){
-  wd = '/Users/Ray/Documents/Work/scRNAseq/yanting/pituitary_scRNAseq_analysis'
-}
-rm(work_space)
-knitr::opts_knit$set(root.dir = wd)
+rm(list = ls(all.names = TRUE))
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
 ## Initialization
 
 ```{r}
 library(Seurat)
+library(SeuratDisk)
 library(cellassign)
 library(scran)
 library(pheatmap)
@@ -42,6 +30,7 @@ if (genename=="stable_id"){
 } else if (genename=="short"){
   cells.sce <- readRDS(file.path(wd,'QC',"cells.sce_short.rds"))
 }
+cells <- readRDS("../data/cells.rds")
 ```
 
 ## Using CellAssign to assign cells to known types

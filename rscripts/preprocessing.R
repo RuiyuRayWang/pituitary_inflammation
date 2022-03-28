@@ -1,5 +1,7 @@
 library(tidyverse)
 library(Seurat)
+library(SeuratDisk)
+library(tidyverse)
 library(scater)
 library(scWidgets)
 
@@ -9,7 +11,7 @@ ens_id <- data %>% pull("gene")
 data <- data %>% column_to_rownames(var = "gene") %>% as.data.frame()
 
 ## Rename rows
-anno <- read.table(file = 'misc/MM.GRCm38.102.annotation.tab', sep = "\t", col.names = c("ensembl_id", "symbol"))
+anno <- read.table(file = 'misc/RESOURCES/ensembl/release_102/gtf/mus_musculus/MM.GRCm38.102.annotation.tab', sep = "\t", col.names = c("ensembl_id", "symbol"))
 data <- renameRows(data, anno)
 
 ## Attach Feature metadata
@@ -43,6 +45,7 @@ keep_feature <- nexprs(cells.filtered, byrow=TRUE) > 0
 keep_feature[grep("\\bRp[sl]\\d+[^k]*\\b", rownames(cells.sce))] <- FALSE
 keep_feature[grep("mt-", rownames(cells.sce))] <- FALSE
 cells.filtered <- cells.filtered[keep_feature,]
+saveRDS(cells.filtered, file = "data/cells.filtered.sce.rds")  ## for cellassign
 
 cells.new <- as.Seurat(cells.filtered)
 cells.new[["nCount_originalexp"]] <- NULL; cells.new[["nFeature_originalexp"]] <- NULL
@@ -79,4 +82,5 @@ cells.new <- RenameIdents(cells.new,
                           'Poly(i:c) 20mg 8w' = 'Poly(i:c) >3w')
 cells.new[["stim"]] <- Idents(cells.new)
 
-saveRDS(cells.new, 'data/cells.rds')
+# saveRDS(cells.new, 'data/cells.rds')
+SaveH5Seurat(object = cells.new, filename = "data/cells_pre.h5Seurat", overwrite = T)

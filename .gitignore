@@ -1,5 +1,7 @@
 # Custom ignore
 data
+misc/RESOURCES
+outs
 
 # History files
 .Rhistory

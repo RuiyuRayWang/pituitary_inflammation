@@ -2,6 +2,10 @@
 data
 misc/RESOURCES
 outs
+deprecated/*
+notebooks/cache/*
+notebooks/figures/*
+notebooks/.ipynb_checkpoints/*
 
 # History files
 .Rhistory

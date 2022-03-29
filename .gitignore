@@ -5,7 +5,7 @@ outs
 deprecated/*
 notebooks/cache/*
 notebooks/figures/*
-notebooks/.ipynb_checkpoints/*
+**/*.ipynb_checkpoints/
 
 # History files
 .Rhistory

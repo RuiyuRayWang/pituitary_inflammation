@@ -261,10 +261,13 @@ cells.integrated$cell_type_brief <- factor(cells.integrated$cell_type_brief,
 
 cells.integrated$cell_type_anno <- NULL
 
-
-
 save(somatotropes_selected, corticotropes_selected, lactotropes_selected, melanotropes_selected, gonadotropes_selected,
      thyrotropes_selected, pou1f1_selected, stem_selected, wbcs_selected, rbcs_selected, endo_selected, pericytes_selected,
      pituicytes_selected, ambiguous, 
      file = paste0("data/selected_cells_",Sys.Date(),".rda"))
+
+cells.integrated$cell_type_refined <- as.character(cells.integrated$cell_type_refined)
+cells.integrated$cell_type_brief <- as.character(cells.integrated$cell_type_brief)
+
 SaveH5Seurat(object = cells.integrated, filename = "data/cells_postprocessed.h5Seurat", overwrite = T)
+Convert("data/cells_postprocessed.h5Seurat", dest = "h5ad", overwrite = T)

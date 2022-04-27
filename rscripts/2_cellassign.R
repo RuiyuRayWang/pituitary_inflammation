@@ -60,13 +60,13 @@ pituitary_marker_list <- list(
   Gonadotropes = c("Fshb","Lhb","Gnrhr","Cga","Chgb","Scg2"),
   Thyrotropes = c("Tshb","Trhr","Cga","Chgb","Scg2"),
   `Pou1f1 Progenitors` = c("Pbk","Top2a","Mki67"),
-  `Red blood cells` = c("Hbb-bt","Hbb-bs"),
-  `White blood cells` = c("C1qa","Ctss"), 
-  `Folliculostellate cells` = c("S100b","Fxyd1"),
-  `Endothelial cells` = c("Pecam1","Emcn","Plvap"),
+  `Red Blood Cells` = c("Hbb-bt","Hbb-bs"),
+  `White Blood Cells` = c("C1qa","Ctss"), 
+  `Folliculostellate Cells` = c("S100b","Fxyd1"),
+  `Endothelial Cells` = c("Pecam1","Emcn","Plvap"),
   `Pituicyte` = c("Gja1","Scn7a","Col25a1"),
   `Pericytes` = c("Col1a1","Dcn","Ogn","Lum","Pdgfrb"),
-  `Stem cells` = c("Sox2","Aldh3a1","Aldh1a2","Cyp2f2")
+  `Stem Cells` = c("Sox2","Aldh3a1","Aldh1a2","Cyp2f2")
 )
 mks <- marker_list_to_mat(pituitary_marker_list, include_other = FALSE)
 # pheatmap::pheatmap(mks)
@@ -97,11 +97,12 @@ fit <- cellassign(
 )
 saveRDS(fit, file = paste0("data/fit_cellassign_",Sys.Date(),".rds"))
 
+## Switch R version back
 ## Assign to objects
 library(SeuratDisk)
 # cells.seurat <- readRDS('data/cells_pre.rds')
 cells.seurat <- LoadH5Seurat("data/cells_pre.h5Seurat")
-fit <- readRDS(file = "data/fit_cellassign_2022-03-28.rds")
+fit <- readRDS(file = "data/fit_cellassign_2022-04-27.rds")
 cells.seurat$cell_type_cellassign <- fit$cell_type
 # saveRDS(cells.seurat, file = "data/cells.rds")
 SaveH5Seurat(cells.seurat, filename = "data/cells_assigned.h5Seurat", overwrite = T)  ## use h5 format whenever possible

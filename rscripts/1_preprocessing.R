@@ -3,7 +3,6 @@ library(Seurat)
 library(SeuratDisk)
 library(tidyverse)
 library(scater)
-library(scWidgets)
 
 data_long <- read.table(file = 'data/Pituitary_counts_all.tsv.gz', sep = "\t", header = TRUE)
 data <- pivot_wider(data_long, names_from = "cell", values_from = "count", values_fill = 0)
@@ -11,12 +10,37 @@ ens_id <- data %>% pull("gene")
 data <- data %>% column_to_rownames(var = "gene") %>% as.data.frame()
 
 ## Rename rows
-anno <- read.table(file = 'misc/RESOURCES/ensembl/release_102/gtf/mus_musculus/MM.GRCm38.102.annotation.tab', sep = "\t", col.names = c("ensembl_id", "symbol"))
-data <- renameRows(data, anno)
+# anno <- read.table(file = 'misc/RESOURCES/ensembl/release_102/gtf/mus_musculus/MM.GRCm38.102.annotation.tab', sep = "\t", col.names = c("ensembl_id", "symbol"))
+renameRows <- function(df, anno){
+  stopifnot(is.data.frame(df))
+  stopifnot("ensembl_id" %in% colnames(anno) | "symbol" %in% colnames(anno))
+  
+  if(any(!rownames(df) %in% anno$ensembl_id)){
+    df <- dplyr::slice(df, -which(!rownames(df) %in% anno$ensembl_id))  # df may contain rows not in the annotation table. Remove these rows.
+  }
+  rn <- rownames(df)
+  rn <- anno[match(rn,anno$ensembl_id),"symbol"]
+  dup <- rn[duplicated(rn)]
+  print(paste0("The following genes are duplicated: ", paste0(dup, collapse = ", "), ". Making unique."))
+  for (d in dup){
+    count = 0
+    for (i in 1:length(rn)){
+      if (rn[i] == d) {
+        count = count+1
+        if (count>1){
+          rn[i] = paste0(rn[i],"-",count)
+        }
+      }
+    }
+  }
+  rownames(df) <- rn
+  return(df)
+}
+# data <- renameRows(data, anno)
 
 ## Attach Feature metadata
 cells <- CreateSeuratObject(data, project = "PIT_INFL")
-cells@assays$RNA@meta.features[["ens_id"]] <- ens_id
+# cells@assays$RNA@meta.features[["ens_id"]] <- ens_id
 
 cells[["barcode"]] <- str_split(string = rownames(cells[[]]), pattern = "_", simplify = TRUE)[,1]
 cells[["library"]] <- str_split(string = rownames(cells[[]]), pattern = "_", simplify = TRUE)[,2]
@@ -50,6 +74,7 @@ saveRDS(cells.filtered, file = "data/cells.filtered.sce.rds")  ## for cellassign
 cells.new <- as.Seurat(cells.filtered)
 cells.new[["nCount_originalexp"]] <- NULL; cells.new[["nFeature_originalexp"]] <- NULL
 cells.new <- RenameAssays(cells.new, originalexp = "RNA")
+cells.new[["ident"]] <- NULL
 
 ## Parse metadata
 meta <- read.csv('misc/metadata.csv')
@@ -66,7 +91,6 @@ for (ident in names(meta)[2:ncol(meta)]){
   }
   cells.new[[ident]] <- Idents(cells.new)
 }
-cells.new[["ident"]] <- NULL
 
 cells.new[["treat_dose_duration"]] <- paste(cells.new$treat, paste(cells.new$dose, cells.new$duration, sep = " "), sep = " ")
 Idents(cells.new) <- "treat_dose_duration"

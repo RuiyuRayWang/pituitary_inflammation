@@ -11,31 +11,31 @@ data <- data %>% column_to_rownames(var = "gene") %>% as.data.frame()
 
 ## Rename rows
 # anno <- read.table(file = 'misc/RESOURCES/ensembl/release_102/gtf/mus_musculus/MM.GRCm38.102.annotation.tab', sep = "\t", col.names = c("ensembl_id", "symbol"))
-renameRows <- function(df, anno){
-  stopifnot(is.data.frame(df))
-  stopifnot("ensembl_id" %in% colnames(anno) | "symbol" %in% colnames(anno))
-  
-  if(any(!rownames(df) %in% anno$ensembl_id)){
-    df <- dplyr::slice(df, -which(!rownames(df) %in% anno$ensembl_id))  # df may contain rows not in the annotation table. Remove these rows.
-  }
-  rn <- rownames(df)
-  rn <- anno[match(rn,anno$ensembl_id),"symbol"]
-  dup <- rn[duplicated(rn)]
-  print(paste0("The following genes are duplicated: ", paste0(dup, collapse = ", "), ". Making unique."))
-  for (d in dup){
-    count = 0
-    for (i in 1:length(rn)){
-      if (rn[i] == d) {
-        count = count+1
-        if (count>1){
-          rn[i] = paste0(rn[i],"-",count)
-        }
-      }
-    }
-  }
-  rownames(df) <- rn
-  return(df)
-}
+# renameRows <- function(df, anno){
+#   stopifnot(is.data.frame(df))
+#   stopifnot("ensembl_id" %in% colnames(anno) | "symbol" %in% colnames(anno))
+#   
+#   if(any(!rownames(df) %in% anno$ensembl_id)){
+#     df <- dplyr::slice(df, -which(!rownames(df) %in% anno$ensembl_id))  # df may contain rows not in the annotation table. Remove these rows.
+#   }
+#   rn <- rownames(df)
+#   rn <- anno[match(rn,anno$ensembl_id),"symbol"]
+#   dup <- rn[duplicated(rn)]
+#   print(paste0("The following genes are duplicated: ", paste0(dup, collapse = ", "), ". Making unique."))
+#   for (d in dup){
+#     count = 0
+#     for (i in 1:length(rn)){
+#       if (rn[i] == d) {
+#         count = count+1
+#         if (count>1){
+#           rn[i] = paste0(rn[i],"-",count)
+#         }
+#       }
+#     }
+#   }
+#   rownames(df) <- rn
+#   return(df)
+# }
 # data <- renameRows(data, anno)
 
 ## Attach Feature metadata

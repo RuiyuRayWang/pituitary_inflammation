@@ -30,36 +30,94 @@ hpcs.lps <- subset(cells.lps, subset = cell_type_brief %in% c("Som","Lac","Cort"
 hpcs.lps <- SSW(hpcs.lps, def_assay = "RNA")
 hpcs.lps <- SSW(hpcs.lps, def_assay = "integrated")
 
-resolutions <- seq(0.1, 1.5, 0.1)
+Idents(hpcs.lps) <- "Undetermined"
 
+## Iteratively determine cell states
+## Repeat same procedures for all major hormonal cell types
 som.lps <- subset(hpcs.lps, subset = cell_type_brief == "Som")
 # som.lps <- SSW(som.lps, def_assay = "RNA")
 # som.lps <- SSW(som.lps, def_assay = "integrated")
 DefaultAssay(som.lps) <- "RNA"
 som.lps <- som.lps %>%
   NormalizeData() %>% FindVariableFeatures() %>% ScaleData() %>% RunPCA() %>% FindNeighbors(dims = 1:50) %>% RunUMAP(dims = 1:50)
-res = 0.02; som.lps <- FindClusters(som.lps, resolution = res)  # a range of resolutions tested manually
-nrow(unique(som.lps[[paste0("RNA_snn_res.",res)]]))
-
-
+res = 0.02; som.lps <- FindClusters(som.lps, resolution = res)  ## A range of resolutions tested manually
+nrow(unique(som.lps[[paste0("RNA_snn_res.",res)]])) == 2
+Idents(som.lps) <- paste0("RNA_snn_res.",res)
+som.lps <- RenameIdents(som.lps, `0` = "Inflammation", `1` = "Healthy")
+som.lps$state <- Idents(som.lps)
+for (s in levels(som.lps$state)){
+  hpcs.lps <- SetIdent(hpcs.lps, cells = WhichCells(som.lps, expression = state == s), value = s)  ## Copy labels to master object (hpcs.lps)
+}
 
 lac.lps <- subset(hpcs.lps, subset = cell_type_brief == "Lac")
-lac.lps <- SSW(lac.lps, def_assay = "RNA")
-lac.lps <- SSW(lac.lps, def_assay = "integrated")
+DefaultAssay(lac.lps) <- "RNA"
+lac.lps <- lac.lps %>%
+  NormalizeData() %>% FindVariableFeatures() %>% ScaleData() %>% RunPCA() %>% FindNeighbors(dims = 1:50) %>% RunUMAP(dims = 1:50)
+res = 0.1; lac.lps <- FindClusters(lac.lps, resolution = res)  # a range of resolutions tested manually
+nrow(unique(lac.lps[[paste0("RNA_snn_res.",res)]])) == 2
+Idents(lac.lps) <- paste0("RNA_snn_res.",res)
+# DimPlot(lac.lps) | DimPlot(cort.lps, group.by = "stim")
+lac.lps <- RenameIdents(lac.lps, `0` = "Healthy", `1` = "Inflammation")
+lac.lps$state <- Idents(lac.lps)
+for (s in levels(lac.lps$state)){
+  hpcs.lps <- SetIdent(hpcs.lps, cells = WhichCells(lac.lps, expression = state == s), value = s)
+}
 
 cort.lps <- subset(hpcs.lps, subset = cell_type_brief == "Cort")
-cort.lps <- SSW(cort.lps, def_assay = "RNA")
-cort.lps <- SSW(cort.lps, def_assay = "integrated")
+DefaultAssay(cort.lps) <- "RNA"
+cort.lps <- cort.lps %>%
+  NormalizeData() %>% FindVariableFeatures() %>% ScaleData() %>% RunPCA() %>% FindNeighbors(dims = 1:50) %>% RunUMAP(dims = 1:50)
+res = 0.1; cort.lps <- FindClusters(cort.lps, resolution = res)  # a range of resolutions tested manually
+nrow(unique(cort.lps[[paste0("RNA_snn_res.",res)]])) == 2
+Idents(cort.lps) <- paste0("RNA_snn_res.",res)
+# DimPlot(cort.lps) | DimPlot(cort.lps, group.by = "stim")
+cort.lps <- RenameIdents(cort.lps, `0` = "Healthy", `1` = "Inflammation")
+cort.lps$state <- Idents(cort.lps)
+for (s in levels(cort.lps$state)){
+  hpcs.lps <- SetIdent(hpcs.lps, cells = WhichCells(cort.lps, expression = state == s), value = s)
+}
 
 gonad.lps <- subset(hpcs.lps, subset = cell_type_brief == "Gonad")
-gonad.lps <- SSW(gonad.lps, def_assay = "RNA")
-gonad.lps <- SSW(gonad.lps, def_assay = "integrated")
+DefaultAssay(gonad.lps) <- "RNA"
+gonad.lps <- gonad.lps %>%
+  NormalizeData() %>% FindVariableFeatures() %>% ScaleData() %>% RunPCA() %>% FindNeighbors(dims = 1:50) %>% RunUMAP(dims = 1:50)
+res = 0.1; gonad.lps <- FindClusters(gonad.lps, resolution = res)  # a range of resolutions tested manually
+nrow(unique(gonad.lps[[paste0("RNA_snn_res.",res)]])) == 2
+Idents(gonad.lps) <- paste0("RNA_snn_res.",res)
+# DimPlot(gonad.lps) | DimPlot(gonad.lps, group.by = "stim")
+gonad.lps <- RenameIdents(gonad.lps, `0` = "Healthy", `1` = "Inflammation")
+gonad.lps$state <- Idents(gonad.lps)
+for (s in levels(gonad.lps$state)){
+  hpcs.lps <- SetIdent(hpcs.lps, cells = WhichCells(gonad.lps, expression = state == s), value = s)
+}
 
 mel.lps <- subset(hpcs.lps, subset = cell_type_brief == "Mel")
-mel.lps <- SSW(mel.lps, def_assay = "RNA")
-mel.lps <- SSW(mel.lps, def_assay = "integrated")
+DefaultAssay(mel.lps) <- "RNA"
+mel.lps <- mel.lps %>%
+  NormalizeData() %>% FindVariableFeatures() %>% ScaleData() %>% RunPCA() %>% FindNeighbors(dims = 1:50) %>% RunUMAP(dims = 1:50)
+res = 0.1; mel.lps <- FindClusters(mel.lps, resolution = res)  # a range of resolutions tested manually
+nrow(unique(mel.lps[[paste0("RNA_snn_res.",res)]])) == 2
+Idents(mel.lps) <- paste0("RNA_snn_res.",res)
+# DimPlot(mel.lps) | DimPlot(mel.lps, group.by = "stim")
+mel.lps <- RenameIdents(mel.lps, `1` = "Healthy", `0` = "Inflammation")
+mel.lps$state <- Idents(mel.lps)
+for (s in levels(mel.lps$state)){
+  hpcs.lps <- SetIdent(hpcs.lps, cells = WhichCells(mel.lps, expression = state == s), value = s)
+}
 
 thyro.lps <- subset(hpcs.lps, subset = cell_type_brief == "Thyro")
-thyro.lps <- SSW(thyro.lps, def_assay = "RNA")
-thyro.lps <- SSW(thyro.lps, def_assay = "integrated")
+DefaultAssay(thyro.lps) <- "RNA"
+thyro.lps <- thyro.lps %>%
+  NormalizeData() %>% FindVariableFeatures() %>% ScaleData() %>% RunPCA() %>% FindNeighbors(dims = 1:50) %>% RunUMAP(dims = 1:50)
+res = 0.8; thyro.lps <- FindClusters(thyro.lps, resolution = res)  # a range of resolutions tested manually
+nrow(unique(thyro.lps[[paste0("RNA_snn_res.",res)]])) == 2
+Idents(thyro.lps) <- paste0("RNA_snn_res.",res)
+# DimPlot(thyro.lps) | DimPlot(thyro.lps, group.by = "stim")
+thyro.lps <- RenameIdents(thyro.lps, `0` = "Healthy", `1` = "Inflammation")
+thyro.lps$state <- Idents(thyro.lps)
+for (s in levels(thyro.lps$state)){
+  hpcs.lps <- SetIdent(hpcs.lps, cells = WhichCells(thyro.lps, expression = state == s), value = s)
+}
 
+SaveH5Seurat(hpcs.lps, "data/hpcs_state_marked.h5Seurat", overwrite = T, verbose = F)
+Convert(source = "data/hpcs_state_marked.h5Seurat", dest = "h5ad", overwrite = T)

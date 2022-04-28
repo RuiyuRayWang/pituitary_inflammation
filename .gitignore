@@ -1,6 +1,7 @@
 # Custom ignore
 data
 misc/RESOURCES
+manuscripts/*
 outs
 deprecated/*
 notebooks/cache/*

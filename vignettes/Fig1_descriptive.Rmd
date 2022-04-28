@@ -1,0 +1,115 @@
+---
+title: "Figure 1: Descriptive Analysis"
+author: "Ruiyu Ray Wang"
+date: "`r Sys.Date()`"
+output: html_document
+knit: (function(input_file, encoding) {
+    out_dir <- '../docs';
+    rmarkdown::render(input_file,
+      encoding=encoding,
+      output_file=file.path(dirname(input_file), out_dir, 'Fig1_descriptive.html'))})
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+## Initialization
+
+```{r}
+suppressPackageStartupMessages({
+  library(Seurat)
+  library(SeuratDisk)
+  library(tidyverse)
+  library(ggplot2)
+  library(patchwork)
+  library(RColorBrewer)
+})
+```
+
+```{r}
+suppressMessages(
+  extrafont::loadfonts(device="postscript")
+)
+```
+
+```{r}
+cells <- LoadH5Seurat('../data/cells_postprocessed.h5Seurat', verbose = F)
+```
+
+Reordering factor levels.
+```{r}
+cells$cell_type_brief <- factor(cells$cell_type_brief,
+                                levels = c("Som", "Lac", "Cort", "Mel", "Gonad", "Thyro", "Pou1f1", "Stem", "WBCs", "RBCs", "Endo", "Peri", "Pitui", "Ambig"))
+```
+
+### Figure 1b
+
+```{r}
+DimPlot(cells, group.by = 'cell_type_brief', reduction = 'umap.int', pt.size = .8, label = TRUE) + 
+  ggtitle(label = NULL) +
+  # NoLegend() + 
+  xlab("UMAP_1") + 
+  ylab("UMAP_2")
+```
+```{r}
+## DO NOT USE
+ggsave(filename = "umapint_celltypebrief.eps", device = "eps", path = '../outs/Fig1/', width = 6.5, height = 6, dpi = 300, family = "Arial")
+```
+
+```{r}
+DimPlot(cells, group.by = 'cell_type_brief', reduction = 'umap.int', pt.size = .8, label = FALSE) + 
+  ggtitle(label = NULL) +
+  NoLegend() +
+  xlab("UMAP_1") + 
+  ylab("UMAP_2") +
+  theme(
+    axis.title = element_text(size = 18)
+  )
+```
+```{r}
+ggsave(filename = "umapint_celltypebrief_clean.eps", device = "eps", path = '../outs/Fig1/', width = 6.5, height = 6, dpi = 300, family = "Arial")
+```
+
+### Figure 1d
+
+```{r}
+features_to_plot <- c('Gh', 'Ghrhr', 'Pomc', 'Prl', 'Cga', 'Fshb', 'Lhb', 'Tshb')
+cells <- ScaleData(cells, features = c(features_to_plot, VariableFeatures(cells)))
+# Generic function to iteratively plot features and save
+iter_feature_plot_save <- function(object, features_to_plot, reduction = "umap.int", out_dir){
+  for (feature in features_to_plot){
+    # Original FeaturePlot
+    p <- FeaturePlot(object, features = feature, reduction = reduction) +
+      ggtitle(label = NULL) + 
+      NoAxes() + 
+      scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdYlBu"))) +
+      annotate("text", x = -18, y = 13.5, label = feature, size = 5) +
+      theme(
+        legend.position = c(0.06,0.20),
+        legend.key.size = unit(10, units = "pt"),
+        legend.text = element_text(size = 8),
+        panel.border = element_rect(colour = "black", fill=NA, size=.5)
+        )
+      
+    ## FeaturePlot without legend, title, axes.
+    # p_clean <- FeaturePlot(object, features = feature, reduction = reduction) +
+    #   ggtitle(label = NULL) + 
+    #   NoAxes() + 
+    #   NoLegend() +
+    #   theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) + 
+    #   scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdYlBu")))
+    ggsave(filename = paste0("featureplot_",feature,"_",reduction,".eps"), plot = p, device = "eps", path = out_dir, dpi = 300,
+           width = 3, height = 3, family = "Arial")
+    # ggsave(filename = paste0("featureplot_",feature,"_",reduction,"_clean.eps"), plot = p_clean, device = "eps", path = out_dir, width = 4, height = 4)
+  }
+}
+```
+```{r}
+# Do plotting
+out_dir = '../outs/Fig1/F1d'
+iter_feature_plot_save(cells, features_to_plot = features_to_plot, out_dir = out_dir)
+```
+
+
+

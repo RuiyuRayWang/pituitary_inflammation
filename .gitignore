@@ -3,6 +3,7 @@ data
 misc/RESOURCES
 manuscripts/*
 outs
+figures
 deprecated/*
 notebooks/cache/*
 notebooks/figures/*

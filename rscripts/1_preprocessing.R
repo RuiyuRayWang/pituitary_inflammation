@@ -4,7 +4,9 @@ library(SeuratDisk)
 library(tidyverse)
 library(scater)
 
-data_long <- read.table(file = 'data/Pituitary_counts_all.tsv.gz', sep = "\t", header = TRUE)
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+
+data_long <- read.table(file = '../data/Pituitary_counts_all.tsv.gz', sep = "\t", header = TRUE)
 data <- pivot_wider(data_long, names_from = "cell", values_from = "count", values_fill = 0)
 ens_id <- data %>% pull("gene")
 data <- data %>% column_to_rownames(var = "gene") %>% as.data.frame()
@@ -69,7 +71,7 @@ keep_feature <- nexprs(cells.filtered, byrow=TRUE) > 0
 keep_feature[grep("\\bRp[sl]\\d+[^k]*\\b", rownames(cells.sce))] <- FALSE
 keep_feature[grep("mt-", rownames(cells.sce))] <- FALSE
 cells.filtered <- cells.filtered[keep_feature,]
-saveRDS(cells.filtered, file = "data/cells.filtered.sce.rds")  ## for cellassign
+saveRDS(cells.filtered, file = "../data/cells.filtered.sce.rds")  ## for cellassign
 
 cells.new <- as.Seurat(cells.filtered)
 cells.new[["nCount_originalexp"]] <- NULL; cells.new[["nFeature_originalexp"]] <- NULL
@@ -106,5 +108,5 @@ cells.new <- RenameIdents(cells.new,
                           'Poly(i:c) 20mg 8w' = 'Poly(i:c) >3w')
 cells.new[["stim"]] <- Idents(cells.new)
 
-# saveRDS(cells.new, 'data/cells.rds')
-SaveH5Seurat(object = cells.new, filename = "data/cells_pre.h5Seurat", overwrite = T)
+# saveRDS(cells.new, '../data/cells.rds')
+SaveH5Seurat(object = cells.new, filename = "../data/cells_pre.h5Seurat", overwrite = T)

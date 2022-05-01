@@ -1,0 +1,195 @@
+library(Seurat)
+library(SeuratDisk)
+library(scales)
+library(ggplot2)
+library(patchwork)
+library(RColorBrewer)
+
+suppressMessages(
+  extrafont::loadfonts(device="postscript")
+)
+
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+
+cells <- LoadH5Seurat("../data/cells_postprocessed.h5Seurat")
+
+hpcs.lps <- LoadH5Seurat("../data/hpcs_lps_state_marked.h5Seurat")
+
+# Fig1b
+## Reorder factor levels
+cells$cell_type_brief <- factor(cells$cell_type_brief, levels = c("Som", "Lac", "Cort", "Mel",
+                                                                  "Gonad", "Thyro", "Pou1f1", "Stem",
+                                                                  "WBCs", "RBCs", "Endo",
+                                                                  "Peri", "Pitui", "Ambig"))
+
+DimPlot(cells, reduction = "umap.int", cols = c(hue_pal()(13),"#CCCCCC")) + 
+  NoLegend() +
+  xlab("UMAP_1") + ylab("UMAP_2") +
+  theme(
+    axis.text = element_text(size = 15),
+    axis.title = element_text(size = 18)
+  )
+ggsave(
+  filename = "umapint_celltypebrief_clean.eps", 
+  plot = last_plot(), 
+  device = "eps", 
+  path = "../figures/Fig1/", 
+  dpi = 300,
+  family = "Arial"
+  )
+
+# Fig1d
+c_features <- c("Gh", "Ghrhr", "Pomc", "Pax7", "Prl", "Cga", "Lhb", "Fshb", "Tshb", "Trhr")
+
+for (feat in c_features){
+  FeaturePlot(cells, features = feat, reduction = "umap.int") +
+    scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdYlBu"))) +
+    ggtitle("") +
+    NoAxes() +
+    annotate(label = feat, geom = "text", x = 13, y = 10, hjust = 1, size = 7) +
+    theme(
+      legend.position = c(0.06, 0.24),
+      panel.border = element_rect(colour = "black", fill=NA, size=.5)
+    )
+  ggsave(
+    filename = paste0(feat,"_umapint.eps"),
+    plot = last_plot(),
+    device = "eps",
+    path = "../figures/Fig1/F1d/", 
+    width = 4, height = 4,
+    dpi = 300,
+    family = "Arial"
+  )
+}
+
+## DEPRECATED
+# f.list <- FeaturePlot(cells, features = c_features, reduction = "umap.int", combine = FALSE)
+# for (i in 1:length(f.list)){
+#   f.list[[i]] <- f.list[[i]] + 
+#     scale_colour_gradientn(colours = rev(brewer.pal(n = 11, name = "RdYlBu"))) +
+#     ggtitle("") + 
+#     NoAxes() + 
+#     annotate(label = c_features[i], geom = "text", x = 13, y = 10.8, hjust = 1, size = 6) +
+#     theme(
+#       legend.position = c(0.06, 0.24),
+#       panel.border = element_rect(colour = "black", fill=NA, size=.5)
+#     )
+# }
+# wrap_plots(f.list) + plot_layout(ncol = 5, nrow = 2)
+
+# Fig1e
+DefaultAssay(hpcs.lps) <- "RNA"
+n_epochs = 400
+a = 0.88; b = 1.1
+hpcs.lps <- RunUMAP(hpcs.lps, reduction = "pca", dims = 1:40, n.epochs = n_epochs, a = a, b = b)
+
+DimPlot(hpcs.lps, group.by = "state", reduction = "umap", cols = brewer.pal(n = 12, name = "Paired")[c(8,2)], pt.size = .6) +
+  NoAxes() +
+  NoLegend() +
+  ggtitle(NULL)
+ggsave(
+  filename = "umap_hpcs_lps_clean.eps",
+  plot = last_plot(), 
+  device = "eps", 
+  path = "../figures/Fig1/", 
+  width = 4, height = 4,
+  dpi = 300,
+  )
+
+# Fig1f
+## Som
+som.lps <- subset(hpcs.lps, subset = cell_type_brief == "Som")
+DefaultAssay(som.lps) <- "RNA"
+som.lps <- RunUMAP(som.lps, reduction = "pca", dims = 1:30)
+DimPlot(som.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#F8766D", pt.size = .2) +
+  NoAxes() +
+  NoLegend() +
+  ggtitle(NULL)
+ggsave(
+  filename = "umap_som_lps_clean.eps",
+  plot = last_plot(), 
+  device = "eps", 
+  path = "../figures/Fig1/", 
+  width = 5, height = 3,
+  dpi = 300,
+)
+## Lac
+lac.lps <- subset(hpcs.lps, subset = cell_type_brief == "Lac")
+DefaultAssay(lac.lps) <- "RNA"
+lac.lps <- RunUMAP(lac.lps, reduction = "pca", dims = 1:25)
+DimPlot(lac.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#2BB07B", pt.size = .8) +
+  NoAxes() +
+  NoLegend() +
+  ggtitle(NULL)
+ggsave(
+  filename = "umap_lac_lps_clean.eps",
+  plot = last_plot(), 
+  device = "eps", 
+  path = "../figures/Fig1/", 
+  width = 4, height = 3,
+  dpi = 300,
+)
+## Cort
+cort.lps <- subset(hpcs.lps, subset = cell_type_brief == "Cort")
+DefaultAssay(cort.lps) <- "RNA"
+cort.lps <- RunUMAP(cort.lps, reduction = "pca", dims = 1:25)
+DimPlot(cort.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#9CA037", pt.size = .8) +
+  NoAxes() +
+  NoLegend() +
+  ggtitle(NULL)
+ggsave(
+  filename = "umap_cort_lps_clean.eps",
+  plot = last_plot(), 
+  device = "eps", 
+  path = "../figures/Fig1/", 
+  width = 4, height = 3,
+  dpi = 300,
+)
+## Mel
+mel.lps <- subset(hpcs.lps, subset = cell_type_brief == "Mel")
+DefaultAssay(mel.lps) <- "RNA"
+mel.lps <- RunUMAP(mel.lps, reduction = "pca", dims = 1:20)
+DimPlot(mel.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#1C75BC", pt.size = 1) +
+  NoAxes() +
+  NoLegend() +
+  ggtitle(NULL)
+ggsave(
+  filename = "umap_mel_lps_clean.eps",
+  plot = last_plot(), 
+  device = "eps", 
+  path = "../figures/Fig1/", 
+  width = 4, height = 3,
+  dpi = 300,
+)
+## Gonad
+gonad.lps <- subset(hpcs.lps, subset = cell_type_brief == "Gonad")
+DefaultAssay(gonad.lps) <- "RNA"
+gonad.lps <- RunUMAP(gonad.lps, reduction = "pca", dims = 1:25)
+DimPlot(gonad.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#39A6DC", pt.size = .8) +
+  NoAxes() +
+  NoLegend() +
+  ggtitle(NULL)
+ggsave(
+  filename = "umap_gonad_lps_clean.eps",
+  plot = last_plot(), 
+  device = "eps", 
+  path = "../figures/Fig1/", 
+  width = 3, height = 2,
+  dpi = 300,
+)
+## Thyro
+thyro.lps <- subset(hpcs.lps, subset = cell_type_brief == "Thyro")
+DefaultAssay(thyro.lps) <- "RNA"
+thyro.lps <- RunUMAP(thyro.lps, reduction = "pca", dims = 1:20)
+DimPlot(thyro.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#B878AC", pt.size = .8) +
+  NoAxes() +
+  NoLegend() +
+  ggtitle(NULL)
+ggsave(
+  filename = "umap_thyro_lps_clean.eps",
+  plot = last_plot(), 
+  device = "eps", 
+  path = "../figures/Fig1/", 
+  width = 3, height = 2,
+  dpi = 300,
+)

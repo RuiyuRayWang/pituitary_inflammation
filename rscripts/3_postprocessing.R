@@ -10,7 +10,9 @@ library(Seurat)
 library(SeuratDisk)
 library(tidyverse)
 
-cells <- LoadH5Seurat('data/cells_assigned.h5Seurat')
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+
+cells <- LoadH5Seurat('../data/cells_assigned.h5Seurat')
 
 cells.list <- SplitObject(cells, split.by = "stim")
 
@@ -30,7 +32,8 @@ DefaultAssay(cells.integrated) <- "integrated"
 
 cells.integrated <- ScaleData(cells.integrated)
 cells.integrated <- RunPCA(cells.integrated, npcs = 50, reduction.name = "pca.int", reduction.key = "PCAint_")
-cells.integrated <- RunUMAP(cells.integrated, dims = 1:50, reduction = "pca.int", reduction.name = "umap.int", reduction.key = "UMAPint_")
+cells.integrated <- RunUMAP(cells.integrated, dims = 1:50, reduction = "pca.int", reduction.name = "umap.int", reduction.key = "UMAPint_", 
+                            a =0.9, b = 1.1)
 cells.integrated <- FindNeighbors(cells.integrated, reduction = "pca.int", dims = 1:50)
 cells.integrated <- FindClusters(cells.integrated, resolution = 0.8)  
 
@@ -51,7 +54,7 @@ cells.integrated <- FindNeighbors(cells.integrated, dims = dims_use)
 cells.integrated <- FindClusters(cells.integrated)
 cells.integrated <- RunUMAP(cells.integrated, dims = dims_use)
 
-SaveH5Seurat(cells.integrated, filename = 'data/cells_integrated.h5Seurat', overwrite = T, verbose = F)
+SaveH5Seurat(cells.integrated, filename = '../data/cells_integrated.h5Seurat', overwrite = T, verbose = F)
 
 # Visualize Louvain clustering and cellassign results side by side
 d1 <- DimPlot(cells.integrated, reduction = "umap.int", group.by = "integrated_snn_res.0.8", label = T) + NoLegend()
@@ -246,19 +249,19 @@ cells.integrated$cell_type_refined <- Idents(cells.integrated)
 
 
 cells.integrated$cell_type_refined <- factor(cells.integrated$cell_type_refined, 
-                                             levels = c("Somatotropes", "Corticotropes", "Lactotropes", "Melanotropes",
+                                             levels = c("Somatotropes", "Lactotropes", "Corticotropes", "Melanotropes",
                                                         "Gonadotropes", "Thyrotropes", "Pou1f1 Progenitors", "Stem Cells",
                                                         "White Blood Cells", "Red Blood Cells", "Endothelial Cells",
                                                         "Pericytes", "Pituicytes", "Ambiguous"))
 Idents(cells.integrated) <- "cell_type_refined"
-cells.integrated <- RenameIdents(cells.integrated, `Somatotropes` = "Som", `Corticotropes` = "Cort", `Lactotropes` = "Lac", 
+cells.integrated <- RenameIdents(cells.integrated, `Somatotropes` = "Som", `Lactotropes` = "Lac", `Corticotropes` = "Cort", 
                                  `Melanotropes` = "Mel", `Gonadotropes` = "Gonad", `Thyrotropes` = "Thyro",
                                  `Pou1f1 Progenitors` = "Pou1f1", `Stem Cells` = "Stem", `White Blood Cells` = "WBCs",
                                  `Red Blood Cells` = "RBCs", `Endothelial Cells` = "Endo", `Pericytes` = "Peri",
                                  `Pituicytes` = "Pitui", `Ambiguous` = "Ambig")
 cells.integrated$cell_type_brief <- Idents(cells.integrated)
 cells.integrated$cell_type_brief <- factor(cells.integrated$cell_type_brief,
-                                           levels = c("Som", "Cort", "Lac", "Mel",
+                                           levels = c("Som", "Lac", "Cort", "Mel",
                                                       "Gonad", "Thyro", "Pou1f1", "Stem",
                                                       "WBCs", "RBCs", "Endo",
                                                       "Peri", "Pitui", "Ambig"))
@@ -267,5 +270,5 @@ cells.integrated$cell_type_anno <- NULL
 cells.integrated$cell_type_refined <- as.character(cells.integrated$cell_type_refined)
 cells.integrated$cell_type_brief <- as.character(cells.integrated$cell_type_brief)
 
-SaveH5Seurat(object = cells.integrated, filename = "data/cells_postprocessed.h5Seurat", overwrite = T)
-Convert("data/cells_postprocessed.h5Seurat", dest = "h5ad", overwrite = T)
+SaveH5Seurat(object = cells.integrated, filename = "../data/cells_postprocessed.h5Seurat", overwrite = T)
+Convert("../data/cells_postprocessed.h5Seurat", dest = "h5ad", overwrite = T)

@@ -1,10 +1,11 @@
 ## https://smorabit.github.io/tutorials/8_velocyto/
 
+library(Seurat)
 library(SeuratDisk)
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
-f_name = "cells_postprocessed"
+f_name = "hpcs_lps_state_marked"
 f_path = "../data/"
 out_dir = paste0(f_path,'tmp/')
 if(!dir.exists(out_dir)) dir.create(out_dir, recursive = T)
@@ -23,7 +24,7 @@ write.csv(seurat_obj@meta.data, file=paste0(out_dir,f_name,'_metadata.csv'), quo
 # write expression counts matrix
 library(Matrix)
 counts_matrix <- GetAssayData(seurat_obj, assay = "RNA", slot = "counts")
-writeMM(counts_matrix, file = paste0(out_dir,f_name,'counts.mtx'))
+writeMM(counts_matrix, file = paste0(out_dir,f_name,'_counts.mtx'))
 
 # write dimesnionality reduction matrix, in this example case pca matrix
 for(pca in grep("pca", names(seurat_obj@reductions), value = T)){

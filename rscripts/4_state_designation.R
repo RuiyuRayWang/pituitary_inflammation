@@ -126,3 +126,15 @@ hpcs.lps$state <- Idents(hpcs.lps)
 
 SaveH5Seurat(hpcs.lps, "../data/hpcs_lps_state_marked.h5Seurat", overwrite = T, verbose = F)
 # Convert(source = "../data/hpcs_lps_state_marked.h5Seurat", dest = "h5ad", overwrite = T, verbose = F)  ## DO NOT RUN, use seurat_to_anndata.R
+
+## Copy this file to 'scenic_protocol/files' for SCENIC analyses
+dst_dir = "scenic_protocol/files/"
+if(!dir.exists(dst_dir)){dir.create(dst_dir, recursive = T)}
+f_loom = c('data/hpcs_lps.loom', file.path(dst_dir, 'hpcs_lps.loom'))
+if(any(file.exists(f_loom))){
+  ## Overwriting files causes pyscenic to fail
+  file.remove(f_loom)
+}
+SaveLoom(hpcs.lps, filename = f_loom[1])
+file.copy(from = f_loom[1],
+          to = f_loom[2])

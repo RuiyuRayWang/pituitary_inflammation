@@ -5,6 +5,7 @@ manuscripts/*
 outs
 figures
 deprecated/*
+scenic_protocol
 notebooks/cache/*
 notebooks/figures/*
 **/*.ipynb_checkpoints/

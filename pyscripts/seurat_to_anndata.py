@@ -6,7 +6,7 @@ import numpy as np
 import os
 import pandas as pd
 
-f_name = "cells_postprocessed"
+f_name = "hpcs_lps_state_marked"
 in_dir = "data/tmp/"
 out_dir = "data/"
 
@@ -30,15 +30,15 @@ adata.obs = cell_meta
 adata.obs.index = adata.obs['cell_id'].to_list()
 adata.var.index = gene_names
 
-# # load dimensional reduction, set pca:1
-# for pca in ["pca","pcaint"]:
-#     pc_coord = pd.read_csv(os.path.join(in_dir, '.'.join([f_name + '_' + pca, 'csv'])))
-#     pc_coord.index = adata.obs.index
-#     adata.obsm['_'.join(["X",pca])] = pc_coord.to_numpy()
+# load dimensional reduction, set pca:1
+for pca in ["pca"]:
+    pc_coord = pd.read_csv(os.path.join(in_dir, '.'.join([f_name + '_' + pca, 'csv'])))
+    pc_coord.index = adata.obs.index
+    adata.obsm['_'.join(["X",pca])] = pc_coord.to_numpy()
 
-# # set umap
-# adata.obsm['X_umap'] = np.vstack((adata.obs['UMAP_1'].to_numpy(), adata.obs['UMAP_2'].to_numpy())).T
-# adata.obsm['X_umapint'] = np.vstack((adata.obs['UMAPint_1'].to_numpy(), adata.obs['UMAPint_2'].to_numpy())).T
+# set umap
+adata.obsm['X_umap'] = np.vstack((adata.obs['UMAP_1'].to_numpy(), adata.obs['UMAP_2'].to_numpy())).T
+adata.obsm['X_umapint'] = np.vstack((adata.obs['UMAPint_1'].to_numpy(), adata.obs['UMAPint_2'].to_numpy())).T
 
 # # plot a UMAP colored by sampleID to test:
 # sc.pl.umap(adata, color=['stim'], frameon=False, save=False)

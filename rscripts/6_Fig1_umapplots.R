@@ -11,9 +11,9 @@ suppressMessages(
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
-cells <- LoadH5Seurat("../data/cells_postprocessed.h5Seurat")
+cells <- LoadH5Seurat("../data/cells_postprocessed.h5Seurat", verbose = F)
 
-hpcs.lps <- LoadH5Seurat("../data/hpcs_lps_state_marked.h5Seurat")
+hpcs.lps <- LoadH5Seurat("../data/hpcs_lps_state_marked.h5Seurat", verbose = F)
 
 # Fig1b
 ## Reorder factor levels
@@ -22,7 +22,7 @@ cells$cell_type_brief <- factor(cells$cell_type_brief, levels = c("Som", "Lac", 
                                                                   "WBCs", "RBCs", "Endo",
                                                                   "Peri", "Pitui", "Ambig"))
 
-DimPlot(cells, reduction = "umap.int", cols = c(hue_pal()(13),"#CCCCCC")) + 
+DimPlot(cells, reduction = "umap.int", cols = c(hue_pal()(13)[c(1,2,9,6,10,11,3,4,5,7,8,9,13)],"#CCCCCC")) + 
   NoLegend() +
   xlab("UMAP_1") + ylab("UMAP_2") +
   theme(
@@ -33,7 +33,7 @@ ggsave(
   filename = "umapint_celltypebrief_clean.eps", 
   plot = last_plot(), 
   device = "eps", 
-  path = "../figures/Fig1/", 
+  path = "../figures/Fig1", 
   dpi = 300,
   family = "Arial"
   )
@@ -87,6 +87,25 @@ DimPlot(hpcs.lps, group.by = "state", reduction = "umap", cols = brewer.pal(n = 
   NoAxes() +
   NoLegend() +
   ggtitle(NULL)
+# FetchData(
+#   object = hpcs.lps, 
+#   vars = c("UMAP_1", "UMAP_2", "state", "cell_type_brief")
+# ) %>%
+#   mutate(state = factor(state, levels = c("Healthy","Inflammation")),
+#          cell_type_brief = factor(cell_type_brief, levels = c("Som","Lac","Cort","Mel","Gonad","Thyro"))) %>%
+#   ggplot(aes(x = UMAP_1, y = UMAP_2)) +
+#   geom_point(aes(color = cell_type_brief, shape = state, fill = state), size = 1.2) +
+#   scale_color_manual(values = hue_pal()(13)[c(1,2,9,6,10,11)]) +
+#   scale_shape_manual(values = c(21,23)) +
+#   scale_fill_manual(values = brewer.pal(n = 8, name = "Paired")[c(1,8)]) +
+#   theme(
+#     axis.line = element_blank(),
+#     axis.title = element_blank(),
+#     axis.text = element_blank(),
+#     axis.ticks = element_blank(),
+#     panel.background = element_blank(),
+#     legend.position = "none",
+#   )
 ggsave(
   filename = "umap_hpcs_lps_clean.eps",
   plot = last_plot(), 
@@ -100,7 +119,7 @@ ggsave(
 ## Som
 som.lps <- subset(hpcs.lps, subset = cell_type_brief == "Som")
 DefaultAssay(som.lps) <- "RNA"
-som.lps <- RunUMAP(som.lps, reduction = "pca", dims = 1:30)
+som.lps <- RunUMAP(som.lps, reduction = "pca", dims = 1:40)
 DimPlot(som.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#F8766D", pt.size = .2) +
   NoAxes() +
   NoLegend() +
@@ -109,7 +128,7 @@ ggsave(
   filename = "umap_som_lps_clean.eps",
   plot = last_plot(), 
   device = "eps", 
-  path = "../figures/Fig1/", 
+  path = "../figures/Fig1/F1f/", 
   width = 5, height = 3,
   dpi = 300,
 )
@@ -117,7 +136,7 @@ ggsave(
 lac.lps <- subset(hpcs.lps, subset = cell_type_brief == "Lac")
 DefaultAssay(lac.lps) <- "RNA"
 lac.lps <- RunUMAP(lac.lps, reduction = "pca", dims = 1:25)
-DimPlot(lac.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#2BB07B", pt.size = .8) +
+DimPlot(lac.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#E18A00", pt.size = .8) +
   NoAxes() +
   NoLegend() +
   ggtitle(NULL)
@@ -125,7 +144,7 @@ ggsave(
   filename = "umap_lac_lps_clean.eps",
   plot = last_plot(), 
   device = "eps", 
-  path = "../figures/Fig1/", 
+  path = "../figures/Fig1/F1f/", 
   width = 4, height = 3,
   dpi = 300,
 )
@@ -133,7 +152,7 @@ ggsave(
 cort.lps <- subset(hpcs.lps, subset = cell_type_brief == "Cort")
 DefaultAssay(cort.lps) <- "RNA"
 cort.lps <- RunUMAP(cort.lps, reduction = "pca", dims = 1:25)
-DimPlot(cort.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#9CA037", pt.size = .8) +
+DimPlot(cort.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#00ACFC", pt.size = .8) +
   NoAxes() +
   NoLegend() +
   ggtitle(NULL)
@@ -141,7 +160,7 @@ ggsave(
   filename = "umap_cort_lps_clean.eps",
   plot = last_plot(), 
   device = "eps", 
-  path = "../figures/Fig1/", 
+  path = "../figures/Fig1/F1f/", 
   width = 4, height = 3,
   dpi = 300,
 )
@@ -149,7 +168,7 @@ ggsave(
 mel.lps <- subset(hpcs.lps, subset = cell_type_brief == "Mel")
 DefaultAssay(mel.lps) <- "RNA"
 mel.lps <- RunUMAP(mel.lps, reduction = "pca", dims = 1:20)
-DimPlot(mel.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#1C75BC", pt.size = 1) +
+DimPlot(mel.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#00BE70", pt.size = 1) +
   NoAxes() +
   NoLegend() +
   ggtitle(NULL)
@@ -157,7 +176,7 @@ ggsave(
   filename = "umap_mel_lps_clean.eps",
   plot = last_plot(), 
   device = "eps", 
-  path = "../figures/Fig1/", 
+  path = "../figures/Fig1/F1f/", 
   width = 4, height = 3,
   dpi = 300,
 )
@@ -165,7 +184,7 @@ ggsave(
 gonad.lps <- subset(hpcs.lps, subset = cell_type_brief == "Gonad")
 DefaultAssay(gonad.lps) <- "RNA"
 gonad.lps <- RunUMAP(gonad.lps, reduction = "pca", dims = 1:25)
-DimPlot(gonad.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#39A6DC", pt.size = .8) +
+DimPlot(gonad.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#8B93FF", pt.size = .8) +
   NoAxes() +
   NoLegend() +
   ggtitle(NULL)
@@ -173,7 +192,7 @@ ggsave(
   filename = "umap_gonad_lps_clean.eps",
   plot = last_plot(), 
   device = "eps", 
-  path = "../figures/Fig1/", 
+  path = "../figures/Fig1/F1f/", 
   width = 3, height = 2,
   dpi = 300,
 )
@@ -181,7 +200,7 @@ ggsave(
 thyro.lps <- subset(hpcs.lps, subset = cell_type_brief == "Thyro")
 DefaultAssay(thyro.lps) <- "RNA"
 thyro.lps <- RunUMAP(thyro.lps, reduction = "pca", dims = 1:20)
-DimPlot(thyro.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#B878AC", pt.size = .8) +
+DimPlot(thyro.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#D575FE", pt.size = .8) +
   NoAxes() +
   NoLegend() +
   ggtitle(NULL)
@@ -189,7 +208,7 @@ ggsave(
   filename = "umap_thyro_lps_clean.eps",
   plot = last_plot(), 
   device = "eps", 
-  path = "../figures/Fig1/", 
+  path = "../figures/Fig1/F1f/", 
   width = 3, height = 2,
   dpi = 300,
 )

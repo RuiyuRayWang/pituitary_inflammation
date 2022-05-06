@@ -80,9 +80,10 @@ ggsave(
 
 # Fig1h
 if(!dir.exists('../figures/Fig1/F1h'))dir.create('../figures/Fig1/F1h')
+DefaultAssay(hpcs.lps) <- "AUC"
 ## Som
 som.lps <- subset(hpcs.lps, subset = cell_type_brief == "Som")
-som.lps <- RunUMAP(som.lps, features = rownames(hpcs.lps), umap.method = "umap-learn", reduction.name = "umap.scenic", reduction.key = "UMAPscenic_")
+som.lps <- RunUMAP(som.lps, features = rownames(som.lps), umap.method = "umap-learn", reduction.name = "umap.scenic", reduction.key = "UMAPscenic_")
 DimPlot(som.lps, group.by = "cell_type_brief", cols = "#F8766D") +
   NoAxes() +
   NoLegend() +
@@ -97,10 +98,28 @@ ggsave(
 )
 DefaultAssay(som.lps) <- "AUC"
 
-x <- GetAssayData(som.lps, slot = "data", assay = "AUC")
+auc_mtx <- t(GetAssayData(som.lps, slot = "data", assay = "AUC"))
 
 som_auc_mtx <- auc_mtx[Cells(som.lps),]
-clust_res <- NbClust::NbClust(som_auc_mtx, distance = "euclidean", method = "complete")
+cm <- e1071::cmeans(som_auc_mtx, centers = 2)
+method_use <- c()
+d <- dist(som_auc_mtx, method = "euclidean")
+hclust()
+km <- kmeans(x = som_auc_mtx, centers = 2, iter.max = 20)
+DimPlot(som.lps, reduction = "umap.scenic", cells.highlight = names(km$cluster[km$cluster==1]))
+
+res_dbscan <- dbscan::dbscan(som_auc_mtx, eps = 5, minPts = 4)
+
+DefaultAssay(som.lps) <- "AUC"
+som.lps <- FindVariableFeatures(som.lps, assay = "AUC", selection.method = "disp", nfeatures = 200)
+# som.lps@assays$AUC@scale.data <- GetAssayData(som.lps, slot = "data")[VariableFeatures(som.lps),]
+som.lps <- ScaleData(som.lps, do.scale = FALSE, do.center = TRUE)
+som.lps <- RunPCA(som.lps, reduction.name = "pca.scenic", reduction.key = "PCAscenic_")
+som.lps <- FindNeighbors(som.lps, reduction = "pca.scenic")
+som.lps <- FindClusters(som.lps, graph.name = "AUC_snn", resolution = 0.1)
+DimPlot(som.lps, reduction = "umap.scenic", group.by = "AUC_snn_res.0.1") | DimPlot(som.lps, reduction = "umap.scenic", group.by = "state")
+
+clust_res <- NbClust::NbClust(som_auc_mtx, distance = "euclidean", method = "ward.D", min.nc = 2, max.nc = 4)
 
 ht <- Heatmap(
   matrix = t(auc_mtx)[,Cells(som.lps)], 
@@ -114,9 +133,21 @@ ht <- draw(ht)
 c.dend <- column_dend(ht)
 cclust.list <- column_order(ht)
 
+pheatmap::pheatmap(
+  som_auc_mtx, 
+  
+  show_rownames = F, 
+  show_colnames = F)
 
-
-
+# res <- mixtools::mvnormalmixEM(
+#   x = som_auc_mtx,
+#   epsilon = 1e-02,
+#   verb = TRUE
+# )
+km <- kmeans(
+  x = som_auc_mtx,
+  centers = 2, nstart = 1, algorithm = "MacQueen"
+  )
 
 ## Lac
 lac.lps <- subset(hpcs.lps, subset = cell_type_brief == "Som")

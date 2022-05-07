@@ -27,6 +27,14 @@ regulonsAUC <- get_regulons_AUC(loom, column.attr.name = "RegulonsAUC")
 
 close_loom(loom)
 
+## Manually explore and select binarization thresholds for AUCell scores, using shiny app.
+thresholds <- read.csv("../data/scenic_protocol/files/thresholds.csv", row.names = 1)
+aucellApp <- AUCell_createViewerApp(auc = regulonsAUC,
+                                    thresholds = thresholds,
+                                    tSNE = )
+savedSelections <- shiny::runApp(aucellApp)
+saveRDS(savedSelections, '../data/scenic_protocol/reference_savedSelections.rds')
+
 bin_mtx <- t(read.csv("../data/scenic_protocol/files/bin_mtx.csv", row.names = 1))
 
 hpcs.lps[["AUC"]] <- CreateAssayObject(

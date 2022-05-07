@@ -34,7 +34,7 @@ suppressMessages(
 ```
 
 ```{r}
-cells <- LoadH5Seurat('../data/cells_postprocessed.h5Seurat', verbose = F)
+cells <- LoadH5Seurat('../data/processed/cells_postprocessed.h5Seurat', verbose = F)
 ```
 
 Reordering factor levels.

@@ -15,10 +15,10 @@ suppressMessages(
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
-hpcs.lps <- LoadH5Seurat("../data/hpcs_lps_state_marked.h5Seurat", verbose = F)
+hpcs.lps <- LoadH5Seurat("../data/processed/hpcs_lps_state_marked.h5Seurat", verbose = F)
 metadata <- hpcs.lps@meta.data
 
-pyScenicDir <- '../scenic_protocol'
+pyScenicDir <- '../data/scenic_protocol'
 pyScenicLoomFile <- file.path(pyScenicDir, "files", "hpcs_lps_pyscenic_output.loom")
 loom <- open_loom(pyScenicLoomFile, mode="r")
 
@@ -27,7 +27,7 @@ regulonsAUC <- get_regulons_AUC(loom, column.attr.name = "RegulonsAUC")
 
 close_loom(loom)
 
-bin_mtx <- t(read.csv("../scenic_protocol/files/bin_mtx.csv", row.names = 1))
+bin_mtx <- t(read.csv("../data/scenic_protocol/files/bin_mtx.csv", row.names = 1))
 
 hpcs.lps[["AUC"]] <- CreateAssayObject(
   data = getAUC(regulonsAUC)

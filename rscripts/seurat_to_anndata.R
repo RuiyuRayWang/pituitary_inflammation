@@ -6,7 +6,7 @@ library(SeuratDisk)
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 f_name = "hpcs_lps_state_marked"
-f_path = "../data/"
+f_path = "../data/processed/"
 out_dir = paste0(f_path,'tmp/')
 if(!dir.exists(out_dir)) dir.create(out_dir, recursive = T)
 

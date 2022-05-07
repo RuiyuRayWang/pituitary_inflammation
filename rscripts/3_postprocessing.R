@@ -12,7 +12,7 @@ library(tidyverse)
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
-cells <- LoadH5Seurat('../data/cells_assigned.h5Seurat')
+cells <- LoadH5Seurat('../data/processed/cells_assigned.h5Seurat')
 
 cells.list <- SplitObject(cells, split.by = "stim")
 
@@ -54,7 +54,7 @@ cells.integrated <- FindNeighbors(cells.integrated, dims = dims_use)
 cells.integrated <- FindClusters(cells.integrated)
 cells.integrated <- RunUMAP(cells.integrated, dims = dims_use)
 
-SaveH5Seurat(cells.integrated, filename = '../data/cells_integrated.h5Seurat', overwrite = T, verbose = F)
+SaveH5Seurat(cells.integrated, filename = '../data/processed/cells_integrated.h5Seurat', overwrite = T, verbose = F)
 
 # Visualize Louvain clustering and cellassign results side by side
 d1 <- DimPlot(cells.integrated, reduction = "umap.int", group.by = "integrated_snn_res.0.8", label = T) + NoLegend()
@@ -270,5 +270,5 @@ cells.integrated$cell_type_anno <- NULL
 cells.integrated$cell_type_refined <- as.character(cells.integrated$cell_type_refined)
 cells.integrated$cell_type_brief <- as.character(cells.integrated$cell_type_brief)
 
-SaveH5Seurat(object = cells.integrated, filename = "../data/cells_postprocessed.h5Seurat", overwrite = T)
-Convert("../data/cells_postprocessed.h5Seurat", dest = "h5ad", overwrite = T)
+SaveH5Seurat(object = cells.integrated, filename = "../data/processed/cells_postprocessed.h5Seurat", overwrite = T)
+Convert("../data/processed/cells_postprocessed.h5Seurat", dest = "h5ad", overwrite = T)

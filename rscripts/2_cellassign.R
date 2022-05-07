@@ -50,7 +50,7 @@ library(cellassign)
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
-cells.sce <- readRDS("../data/cells.filtered.sce.rds")
+cells.sce <- readRDS("../data/processed/cells.filtered.sce.rds")
 s <- cells.sce$sizeFactor
 
 # Parse marker list
@@ -97,15 +97,15 @@ fit <- cellassign(
   min_delta = 2,
   verbose = TRUE
 )
-saveRDS(fit, file = paste0("../data/fit_cellassign_",Sys.Date(),".rds"))
+saveRDS(fit, file = paste0("../data/processed/fit_cellassign_",Sys.Date(),".rds"))
 
 ## Switch R version back
 ## Assign to objects
 library(SeuratDisk)
-# cells.seurat <- readRDS('../data/cells_pre.rds')
-cells.seurat <- LoadH5Seurat("../data/cells_pre.h5Seurat")
-fit <- readRDS(file = "../data/fit_cellassign_2022-04-27.rds")
+# cells.seurat <- readRDS('../data/processed/cells_pre.rds')
+cells.seurat <- LoadH5Seurat("../data/processed/cells_pre.h5Seurat")
+fit <- readRDS(file = "../data/processed/fit_cellassign_2022-04-27.rds")
 cells.seurat$cell_type_cellassign <- fit$cell_type
-# saveRDS(cells.seurat, file = "../data/cells.rds")
-SaveH5Seurat(cells.seurat, filename = "../data/cells_assigned.h5Seurat", overwrite = T)  ## use h5 format whenever possible
+# saveRDS(cells.seurat, file = "../data/processed/cells.rds")
+SaveH5Seurat(cells.seurat, filename = "../data/processed/cells_assigned.h5Seurat", overwrite = T)  ## use h5 format whenever possible
 

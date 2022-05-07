@@ -4,7 +4,7 @@ library(tidyverse)
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
-cells <- LoadH5Seurat("../data/cells_postprocessed.h5Seurat")
+cells <- LoadH5Seurat("../data/processed/cells_postprocessed.h5Seurat")
 
 SSW <- function(object, def_assay = "RNA", n_feat = 2000, npcs = 50, dims_use = 1:50, n.neighbors = 30,
                 res = 0.8){
@@ -124,8 +124,8 @@ for (s in levels(thyro.lps$state)){
 
 hpcs.lps$state <- Idents(hpcs.lps)
 
-SaveH5Seurat(hpcs.lps, "../data/hpcs_lps_state_marked.h5Seurat", overwrite = T, verbose = F)
-# Convert(source = "../data/hpcs_lps_state_marked.h5Seurat", dest = "h5ad", overwrite = T, verbose = F)  ## DO NOT RUN, use seurat_to_anndata.R
+SaveH5Seurat(hpcs.lps, "../data/processed/hpcs_lps_state_marked.h5Seurat", overwrite = T, verbose = F)
+# Convert(source = "../data/processed/hpcs_lps_state_marked.h5Seurat", dest = "h5ad", overwrite = T, verbose = F)  ## DO NOT RUN, use seurat_to_anndata.R
 
 ## Copy this file to 'scenic_protocol/files' for SCENIC analyses
 dst_dir = "scenic_protocol/files/"

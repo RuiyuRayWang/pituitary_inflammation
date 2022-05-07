@@ -11,9 +11,9 @@ suppressMessages(
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
-cells <- LoadH5Seurat("../data/cells_postprocessed.h5Seurat", verbose = F)
+cells <- LoadH5Seurat("../data/processed/cells_postprocessed.h5Seurat", verbose = F)
 
-hpcs.lps <- LoadH5Seurat("../data/hpcs_lps_state_marked.h5Seurat", verbose = F)
+hpcs.lps <- LoadH5Seurat("../data/processed/hpcs_lps_state_marked.h5Seurat", verbose = F)
 
 # Fig1b
 ## Reorder factor levels

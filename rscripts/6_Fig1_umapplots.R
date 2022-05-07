@@ -22,7 +22,7 @@ cells$cell_type_brief <- factor(cells$cell_type_brief, levels = c("Som", "Lac", 
                                                                   "WBCs", "RBCs", "Endo",
                                                                   "Peri", "Pitui", "Ambig"))
 
-DimPlot(cells, reduction = "umap.int", cols = c(hue_pal()(13)[c(1,2,9,6,10,11,3,4,5,7,8,9,13)],"#CCCCCC")) + 
+DimPlot(cells, reduction = "umap.int", cols = c(hue_pal()(13)[c(1,2,9,6,10,13,3,4,5,7,8,9,11)],"#CCCCCC")) + 
   NoLegend() +
   xlab("UMAP_1") + ylab("UMAP_2") +
   theme(
@@ -116,11 +116,18 @@ ggsave(
   )
 
 # Fig1f
+DefaultAssay(hpcs.lps) <- "RNA"
+hpcs.lps$state <- factor(hpcs.lps$state, levels = c("Healthy", "Inflammation"))
 ## Som
 som.lps <- subset(hpcs.lps, subset = cell_type_brief == "Som")
 DefaultAssay(som.lps) <- "RNA"
-som.lps <- RunUMAP(som.lps, reduction = "pca", dims = 1:40)
-DimPlot(som.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#F8766D", pt.size = .2) +
+som.lps <- som.lps %>%
+  NormalizeData() %>%
+  FindVariableFeatures() %>%
+  ScaleData() %>%
+  RunPCA() %>%
+  RunUMAP(dims = 1:40)
+DimPlot(som.lps, group.by = "state", reduction = "umap", cols = brewer.pal(n = 12, name = "Paired")[c(5,6)]) +
   NoAxes() +
   NoLegend() +
   ggtitle(NULL)
@@ -135,8 +142,13 @@ ggsave(
 ## Lac
 lac.lps <- subset(hpcs.lps, subset = cell_type_brief == "Lac")
 DefaultAssay(lac.lps) <- "RNA"
-lac.lps <- RunUMAP(lac.lps, reduction = "pca", dims = 1:25)
-DimPlot(lac.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#E18A00", pt.size = .8) +
+lac.lps <- lac.lps %>%
+  NormalizeData() %>%
+  FindVariableFeatures() %>%
+  ScaleData() %>%
+  RunPCA() %>%
+  RunUMAP(dims = 1:30)
+DimPlot(lac.lps, group.by = "state", reduction = "umap", cols = brewer.pal(n = 12, name = "Paired")[c(7,8)]) +
   NoAxes() +
   NoLegend() +
   ggtitle(NULL)
@@ -151,8 +163,13 @@ ggsave(
 ## Cort
 cort.lps <- subset(hpcs.lps, subset = cell_type_brief == "Cort")
 DefaultAssay(cort.lps) <- "RNA"
-cort.lps <- RunUMAP(cort.lps, reduction = "pca", dims = 1:25)
-DimPlot(cort.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#00ACFC", pt.size = .8) +
+cort.lps <- cort.lps %>%
+  NormalizeData() %>%
+  FindVariableFeatures() %>%
+  ScaleData() %>%
+  RunPCA() %>%
+  RunUMAP(dims = 1:25)
+DimPlot(cort.lps, group.by = "state", reduction = "umap", cols = brewer.pal(n = 12, name = "Paired")[c(1,2)]) +
   NoAxes() +
   NoLegend() +
   ggtitle(NULL)
@@ -161,14 +178,19 @@ ggsave(
   plot = last_plot(), 
   device = "eps", 
   path = "../figures/Fig1/F1f/", 
-  width = 4, height = 3,
+  width = 3, height = 3,
   dpi = 300,
 )
 ## Mel
 mel.lps <- subset(hpcs.lps, subset = cell_type_brief == "Mel")
 DefaultAssay(mel.lps) <- "RNA"
-mel.lps <- RunUMAP(mel.lps, reduction = "pca", dims = 1:20)
-DimPlot(mel.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#00BE70", pt.size = 1) +
+mel.lps <- mel.lps %>%
+  NormalizeData() %>%
+  FindVariableFeatures() %>%
+  ScaleData() %>%
+  RunPCA() %>%
+  RunUMAP(dims = 1:30)
+DimPlot(mel.lps, group.by = "state", reduction = "umap", cols = brewer.pal(n = 12, name = "Paired")[c(3,4)]) +
   NoAxes() +
   NoLegend() +
   ggtitle(NULL)
@@ -177,14 +199,19 @@ ggsave(
   plot = last_plot(), 
   device = "eps", 
   path = "../figures/Fig1/F1f/", 
-  width = 4, height = 3,
+  width = 2, height = 3,
   dpi = 300,
 )
 ## Gonad
 gonad.lps <- subset(hpcs.lps, subset = cell_type_brief == "Gonad")
 DefaultAssay(gonad.lps) <- "RNA"
-gonad.lps <- RunUMAP(gonad.lps, reduction = "pca", dims = 1:25)
-DimPlot(gonad.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#8B93FF", pt.size = .8) +
+gonad.lps <- gonad.lps %>%
+  NormalizeData() %>%
+  FindVariableFeatures() %>%
+  ScaleData() %>%
+  RunPCA() %>%
+  RunUMAP(dims = 1:30)
+DimPlot(gonad.lps, group.by = "state", reduction = "umap", cols = c("#7570B3","#BEBADA")) +
   NoAxes() +
   NoLegend() +
   ggtitle(NULL)
@@ -193,14 +220,19 @@ ggsave(
   plot = last_plot(), 
   device = "eps", 
   path = "../figures/Fig1/F1f/", 
-  width = 3, height = 2,
+  width = 2, height = 3,
   dpi = 300,
 )
 ## Thyro
 thyro.lps <- subset(hpcs.lps, subset = cell_type_brief == "Thyro")
 DefaultAssay(thyro.lps) <- "RNA"
-thyro.lps <- RunUMAP(thyro.lps, reduction = "pca", dims = 1:20)
-DimPlot(thyro.lps, group.by = "cell_type_brief", reduction = "umap", cols = "#D575FE", pt.size = .8) +
+thyro.lps <- thyro.lps %>%
+  NormalizeData() %>%
+  FindVariableFeatures() %>%
+  ScaleData() %>%
+  RunPCA() %>%
+  RunUMAP(dims = 1:20)
+DimPlot(thyro.lps, group.by = "state", reduction = "umap", cols = c("#F781BF","#E7298A")) +
   NoAxes() +
   NoLegend() +
   ggtitle(NULL)
@@ -209,6 +241,6 @@ ggsave(
   plot = last_plot(), 
   device = "eps", 
   path = "../figures/Fig1/F1f/", 
-  width = 3, height = 2,
+  width = 2, height = 2,
   dpi = 300,
 )

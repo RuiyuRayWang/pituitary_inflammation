@@ -1,22 +1,14 @@
 library(SCENIC)
 library(SCopeLoomR)
 library(tidyverse)
-library(scales)
 library(Seurat)
 library(SeuratDisk)
-library(ggplot2)
-library(ggpubr)
-library(ComplexHeatmap)
-library(RColorBrewer)
-
-suppressMessages(
-  extrafont::loadfonts(device="postscript")
-)
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 hpcs.lps <- LoadH5Seurat("../data/processed/hpcs_lps_state_marked.h5Seurat", verbose = F)
 metadata <- hpcs.lps@meta.data
+write.csv(metadata, "../data/processed/hpcs_lps_metadata.csv")
 
 pyScenicDir <- '../data/scenic_protocol'
 pyScenicLoomFile <- file.path(pyScenicDir, "files", "hpcs_lps_pyscenic_output.loom")
@@ -28,19 +20,47 @@ regulonsAUC <- get_regulons_AUC(loom, column.attr.name = "RegulonsAUC")
 close_loom(loom)
 
 ## Manually explore and select binarization thresholds for AUCell scores, using shiny app.
-thresholds <- read.csv("../data/scenic_protocol/files/thresholds.csv", row.names = 1)
-aucellApp <- AUCell_createViewerApp(auc = regulonsAUC,
-                                    thresholds = thresholds,
-                                    tSNE = )
+thresholds_csv <- read.csv("../data/scenic_protocol/files/thresholds.csv", row.names = 1)
+thresholds <- thresholds_csv$threshold; names(thresholds) <- rownames(thresholds_csv)
+DefaultAssay(hpcs.lps) <- "RNA"
+tsne_coords <- hpcs.lps %>% 
+  RunTSNE(reduction = "pca", dims = 1:50) %>% 
+  Embeddings(reduction = "tsne") %>% 
+  as.data.frame() %>% 
+  rename("_X" = "tSNE_1", "_Y" = "tSNE_2") %>%
+  as.matrix()
+aucellApp <- AUCell_createViewerApp(
+  auc = regulonsAUC,
+  thresholds = thresholds,
+  tSNE = tsne_coords
+  )
 savedSelections <- shiny::runApp(aucellApp)
-saveRDS(savedSelections, '../data/scenic_protocol/reference_savedSelections.rds')
+thresholds <- savedSelections$thresholds
+saveRDS(savedSelections, '../data/scenic_protocol/files/hpcslps_savedSelections.rds')
 
-bin_mtx <- t(read.csv("../data/scenic_protocol/files/bin_mtx.csv", row.names = 1))
+## Update and export
+thresholds_csv <- as.data.frame(thresholds, row.names = names(thresholds)); colnames(thresholds_csv) <- "threshold"
+write.csv(thresholds_csv, "../data/scenic_protocol/files/thresholds.csv")
+
+auc_mtx <- getAUC(regulonsAUC)
+auc_mtx <- auc_mtx[names(thresholds),]
+
+## Binarize SCENIC AUC using manually curated thresholds
+bin_mtx <- apply(X = auc_mtx, MARGIN = 2, FUN = function(x){
+  ifelse(x > thresholds, 1, 0)
+})
+
+write.csv(x = bin_mtx, file = "../data/scenic_protocol/files/bin_mtx.csv")
 
 hpcs.lps[["AUC"]] <- CreateAssayObject(
   data = getAUC(regulonsAUC)
 )
 
+hpcs.lps[["BIN"]] <- CreateAssayObject(
+  count = bin_mtx
+)
+
+## Perform dimension reduction on AUC matrix of all HPCs
 DefaultAssay(hpcs.lps) <- "AUC"
 hpcs.lps <- RunUMAP(
   hpcs.lps, 
@@ -48,45 +68,9 @@ hpcs.lps <- RunUMAP(
   features = rownames(hpcs.lps), 
   reduction.name = "umap.scenic", 
   reduction.key = "UMAPscenic_"
-  )
-
-# Fig1g
-DimPlot(hpcs.lps, group.by = "state", reduction = "umap.scenic", cols = brewer.pal(n = 12, name = "Paired")[c(8,2)], pt.size = .6) +
-  NoAxes() +
-  NoLegend() +
-  ggtitle(NULL)
-# FetchData(
-#   object = hpcs.lps, 
-#   vars = c("UMAPscenic_1", "UMAPscenic_2", "state", "cell_type_brief")
-#   ) %>%
-#   mutate(state = factor(state, levels = c("Healthy","Inflammation")),
-#          cell_type_brief = factor(cell_type_brief, levels = c("Som","Lac","Cort","Mel","Gonad","Thyro"))) %>%
-#   ggplot(aes(x = UMAPscenic_1, y = UMAPscenic_2)) +
-#   geom_point(aes(color = state, fill = cell_type_brief), shape = 21, size = 1.2, stroke = .8) +
-#   # geom_mark_hull(aes(color = cell_type_brief), concavity = 5) +
-#   scale_fill_manual(values = hue_pal()(13)[c(1,2,9,6,10,11)]) +
-#   scale_color_manual(values = brewer.pal(n = 8, name = "Paired")[c(2,8)]) +
-#   # scale_shape_manual(values = c(20,5)) +
-#   theme(
-#     axis.line = element_blank(),
-#     axis.title = element_blank(),
-#     axis.text = element_blank(),
-#     axis.ticks = element_blank(),
-#     panel.background = element_blank(),
-#     legend.position = "none",
-#   )
-ggsave(
-  filename = "umap_scenic_hpcs_lps_clean.eps",
-  plot = last_plot(), 
-  device = "eps", 
-  path = "../figures/Fig1/", 
-  width = 4, height = 4,
-  dpi = 300,
 )
 
-# Fig1h
-if(!dir.exists('../figures/Fig1/F1h'))dir.create('../figures/Fig1/F1h')
-DefaultAssay(hpcs.lps) <- "AUC"
+
 ## Som
 som.lps <- subset(hpcs.lps, subset = cell_type_brief == "Som")
 DefaultAssay(som.lps) <- "AUC"
@@ -101,18 +85,9 @@ som.lps <- RunUMAP(som.lps, features = rownames(som.lps), reduction = "pca.sceni
 # DimPlot(som.lps, reduction = "umap.scenic", group.by = paste0("AUC_snn_res.",res)) | DimPlot(som.lps, reduction = "umap.scenic", group.by = "state")
 som.lps <- RenameIdents(som.lps, `0` = "Inflammation", `1` = "Healthy")
 som.lps$scenic_state <- factor(Idents(som.lps), levels = c("Healthy","Inflammation"))
-DimPlot(som.lps, group.by = "scenic_state", cols = brewer.pal(n = 12, name = "Paired")[c(5,6)]) +
-  NoAxes() +
-  NoLegend() +
-  ggtitle(NULL)
-ggsave(
-  filename = "umap_scenic_som_lps_clean.eps",
-  plot = last_plot(), 
-  device = "eps", 
-  path = "../figures/Fig1/F1h", 
-  width = 3, height = 3,
-  dpi = 300,
-)
+for (s in levels(som.lps$scenic_state)){
+  hpcs.lps <- SetIdent(object = hpcs.lps, cells = WhichCells(som.lps, expression = scenic_state == s), value = s)
+}
 
 ## Lac
 lac.lps <- subset(hpcs.lps, subset = cell_type_brief == "Lac")
@@ -128,18 +103,9 @@ lac.lps <- RunUMAP(lac.lps, features = rownames(lac.lps), reduction = "pca.sceni
 DimPlot(lac.lps, reduction = "umap.scenic", group.by = paste0("AUC_snn_res.",res)) | DimPlot(lac.lps, reduction = "umap.scenic", group.by = "state")
 lac.lps <- RenameIdents(lac.lps, `0` = "Healthy", `1` = "Inflammation")
 lac.lps$scenic_state <- factor(Idents(lac.lps), levels = c("Healthy","Inflammation"))
-DimPlot(lac.lps, group.by = "scenic_state", cols = brewer.pal(n = 12, name = "Paired")[c(7,8)]) +
-  NoAxes() +
-  NoLegend() +
-  ggtitle(NULL)
-ggsave(
-  filename = "umap_scenic_lac_lps_clean.eps",
-  plot = last_plot(), 
-  device = "eps", 
-  path = "../figures/Fig1/F1h", 
-  width = 3, height = 3,
-  dpi = 300,
-)
+for (s in levels(lac.lps$scenic_state)){
+  hpcs.lps <- SetIdent(object = hpcs.lps, cells = WhichCells(lac.lps, expression = scenic_state == s), value = s)
+}
 
 ## Cort
 cort.lps <- subset(hpcs.lps, subset = cell_type_brief == "Cort")
@@ -155,18 +121,9 @@ cort.lps <- RunUMAP(cort.lps, features = rownames(cort.lps), reduction = "pca.sc
 DimPlot(cort.lps, reduction = "umap.scenic", group.by = paste0("AUC_snn_res.",res)) | DimPlot(cort.lps, reduction = "umap.scenic", group.by = "state")
 cort.lps <- RenameIdents(cort.lps, `0` = "Healthy", `1` = "Inflammation")
 cort.lps$scenic_state <- factor(Idents(cort.lps), levels = c("Healthy","Inflammation"))
-DimPlot(cort.lps, group.by = "scenic_state", cols = brewer.pal(n = 12, name = "Paired")[c(1,2)]) +
-  NoAxes() +
-  NoLegend() +
-  ggtitle(NULL)
-ggsave(
-  filename = "umap_scenic_cort_lps_clean.eps",
-  plot = last_plot(), 
-  device = "eps", 
-  path = "../figures/Fig1/F1h", 
-  width = 3, height = 2,
-  dpi = 300,
-)
+for (s in levels(cort.lps$scenic_state)){
+  hpcs.lps <- SetIdent(object = hpcs.lps, cells = WhichCells(cort.lps, expression = scenic_state == s), value = s)
+}
 
 ## Mel
 mel.lps <- subset(hpcs.lps, subset = cell_type_brief == "Mel")
@@ -182,18 +139,9 @@ mel.lps <- RunUMAP(mel.lps, features = rownames(mel.lps), reduction = "pca.sceni
 DimPlot(mel.lps, reduction = "umap.scenic", group.by = paste0("AUC_snn_res.",res)) | DimPlot(mel.lps, reduction = "umap.scenic", group.by = "state")
 mel.lps <- RenameIdents(mel.lps, `0` = "Healthy", `1` = "Inflammation")
 mel.lps$scenic_state <- factor(Idents(mel.lps), levels = c("Healthy","Inflammation"))
-DimPlot(mel.lps, group.by = "scenic_state", cols = brewer.pal(n = 12, name = "Paired")[c(3,4)]) +
-  NoAxes() +
-  NoLegend() +
-  ggtitle(NULL)
-ggsave(
-  filename = "umap_scenic_mel_lps_clean.eps",
-  plot = last_plot(), 
-  device = "eps", 
-  path = "../figures/Fig1/F1h", 
-  width = 2, height = 3,
-  dpi = 300,
-)
+for (s in levels(mel.lps$scenic_state)){
+  hpcs.lps <- SetIdent(object = hpcs.lps, cells = WhichCells(mel.lps, expression = scenic_state == s), value = s)
+}
 
 ## Gonad
 gonad.lps <- subset(hpcs.lps, subset = cell_type_brief == "Gonad")
@@ -209,18 +157,9 @@ gonad.lps <- RunUMAP(gonad.lps, features = rownames(gonad.lps), reduction = "pca
 DimPlot(gonad.lps, reduction = "umap.scenic", group.by = paste0("AUC_snn_res.",res)) | DimPlot(gonad.lps, reduction = "umap.scenic", group.by = "state")
 gonad.lps <- RenameIdents(gonad.lps, `0` = "Healthy", `1` = "Inflammation")
 gonad.lps$scenic_state <- factor(Idents(gonad.lps), levels = c("Healthy","Inflammation"))
-DimPlot(gonad.lps, group.by = "scenic_state", cols = c("#7570B3","#BEBADA")) +
-  NoAxes() +
-  NoLegend() +
-  ggtitle(NULL)
-ggsave(
-  filename = "umap_scenic_gonad_lps_clean.eps",
-  plot = last_plot(), 
-  device = "eps", 
-  path = "../figures/Fig1/F1h", 
-  width = 3, height = 3,
-  dpi = 300,
-)
+for (s in levels(gonad.lps$scenic_state)){
+  hpcs.lps <- SetIdent(object = hpcs.lps, cells = WhichCells(gonad.lps, expression = scenic_state == s), value = s)
+}
 
 ## Thyro
 thyro.lps <- subset(hpcs.lps, subset = cell_type_brief == "Thyro")
@@ -236,16 +175,11 @@ thyro.lps <- RunUMAP(thyro.lps, features = rownames(thyro.lps), reduction = "pca
 DimPlot(thyro.lps, reduction = "umap.scenic", group.by = paste0("AUC_snn_res.",res)) | DimPlot(thyro.lps, reduction = "umap.scenic", group.by = "state")
 thyro.lps <- RenameIdents(thyro.lps, `0` = "Healthy", `1` = "Inflammation")
 thyro.lps$scenic_state <- factor(Idents(thyro.lps), levels = c("Healthy","Inflammation"))
-DimPlot(thyro.lps, group.by = "scenic_state", cols = c("#F781BF","#E7298A")) +
-  NoAxes() +
-  NoLegend() +
-  ggtitle(NULL)
-ggsave(
-  filename = "umap_scenic_thyro_lps_clean.eps",
-  plot = last_plot(), 
-  device = "eps", 
-  path = "../figures/Fig1/F1h", 
-  width = 3, height = 3,
-  dpi = 300,
-)
+for (s in levels(thyro.lps$scenic_state)){
+  hpcs.lps <- SetIdent(object = hpcs.lps, cells = WhichCells(thyro.lps, expression = scenic_state == s), value = s)
+}
 
+hpcs.lps$scenic_state <- Idents(hpcs.lps)
+hpcs.lps$scenic_state <- as.character(hpcs.lps$scenic_state)
+
+SaveH5Seurat(object = hpcs.lps, filename = "../data/processed/hpcs_lps_scenic_state_marked.h5Seurat", overwrite = T, verbose = F)

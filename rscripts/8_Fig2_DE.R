@@ -14,41 +14,42 @@ hpcs.lps <- LoadH5Seurat("../data/processed/hpcs_lps_state_marked.h5Seurat")
 # Statistical Test
 ## Conserved Markers
 ### Meta-analysis of significant values using `metap` package. Wrapped by the `FindConservedMarkers()` function.
-MIN_P_CUTOFF = 0.01
-FC_CUTOFF = 0.8
+MIN_P_CUTOFF = 0.001
+FC_CUTOFF = 0.75
+test_method = "MAST"
 
 Idents(hpcs.lps) <- "cell_type_brief"
-som.csvd.mks <- FindConservedMarkers(object = hpcs.lps, ident.1 = "Som", grouping.var = "state", only.pos = TRUE) %>%
+som.csvd.mks <- FindConservedMarkers(object = hpcs.lps, ident.1 = "Som", grouping.var = "state", only.pos = TRUE, test.use = test_method) %>%
   dplyr::filter(minimump_p_val <= MIN_P_CUTOFF) %>%
   dplyr::filter(Healthy_avg_log2FC >= FC_CUTOFF) %>% 
   dplyr::filter(Inflammation_avg_log2FC >= FC_CUTOFF) %>%
   add_column(.before = 1, cell_type = "Som") %>% 
   rownames_to_column("gene")
-lac.csvd.mks <- FindConservedMarkers(object = hpcs.lps, ident.1 = "Lac", grouping.var = "state", only.pos = TRUE) %>%
+lac.csvd.mks <- FindConservedMarkers(object = hpcs.lps, ident.1 = "Lac", grouping.var = "state", only.pos = TRUE, test.use = test_method) %>%
   dplyr::filter(minimump_p_val <= MIN_P_CUTOFF) %>%
   dplyr::filter(Healthy_avg_log2FC >= FC_CUTOFF) %>% 
   dplyr::filter(Inflammation_avg_log2FC >= FC_CUTOFF) %>%
   add_column(.before = 1, cell_type = "Lac") %>% 
   rownames_to_column("gene")
-cort.csvd.mks <- FindConservedMarkers(object = hpcs.lps, ident.1 = "Cort", grouping.var = "state", only.pos = TRUE) %>%
+cort.csvd.mks <- FindConservedMarkers(object = hpcs.lps, ident.1 = "Cort", grouping.var = "state", only.pos = TRUE, test.use = test_method) %>%
   dplyr::filter(minimump_p_val <= MIN_P_CUTOFF) %>%
   dplyr::filter(Healthy_avg_log2FC >= FC_CUTOFF) %>% 
   dplyr::filter(Inflammation_avg_log2FC >= FC_CUTOFF) %>%
   add_column(.before = 1, cell_type = "Cort") %>% 
   rownames_to_column("gene")
-mel.csvd.mks <- FindConservedMarkers(object = hpcs.lps, ident.1 = "Mel", grouping.var = "state", only.pos = TRUE) %>%
+mel.csvd.mks <- FindConservedMarkers(object = hpcs.lps, ident.1 = "Mel", grouping.var = "state", only.pos = TRUE, test.use = test_method) %>%
   dplyr::filter(minimump_p_val <= MIN_P_CUTOFF) %>%
   dplyr::filter(Healthy_avg_log2FC >= FC_CUTOFF) %>% 
   dplyr::filter(Inflammation_avg_log2FC >= FC_CUTOFF) %>%
   add_column(.before = 1, cell_type = "Mel") %>% 
   rownames_to_column("gene")
-gonad.csvd.mks <- FindConservedMarkers(object = hpcs.lps, ident.1 = "Gonad", grouping.var = "state", only.pos = TRUE) %>%
+gonad.csvd.mks <- FindConservedMarkers(object = hpcs.lps, ident.1 = "Gonad", grouping.var = "state", only.pos = TRUE, test.use = test_method) %>%
   dplyr::filter(minimump_p_val <= MIN_P_CUTOFF) %>%
   dplyr::filter(Healthy_avg_log2FC >= FC_CUTOFF) %>% 
   dplyr::filter(Inflammation_avg_log2FC >= FC_CUTOFF) %>%
   add_column(.before = 1, cell_type = "Gonad") %>% 
   rownames_to_column("gene")
-thyro.csvd.mks <- FindConservedMarkers(object = hpcs.lps, ident.1 = "Thyro", grouping.var = "state", only.pos = TRUE) %>%
+thyro.csvd.mks <- FindConservedMarkers(object = hpcs.lps, ident.1 = "Thyro", grouping.var = "state", only.pos = TRUE, test.use = test_method) %>%
   dplyr::filter(minimump_p_val <= MIN_P_CUTOFF) %>%
   dplyr::filter(Healthy_avg_log2FC >= FC_CUTOFF) %>% 
   dplyr::filter(Inflammation_avg_log2FC >= FC_CUTOFF) %>%
@@ -62,18 +63,20 @@ csvd.cell.mks <- bind_rows(som.csvd.mks, lac.csvd.mks) %>%
   bind_rows(thyro.csvd.mks)
 
 ### Note there are duplicated values
-csvd.cell.mks %>% write.csv(file = "../outs/conserved_cell_markers.csv", row.names = FALSE)
+csvd.cell.mks %>% write.csv(file = paste0("../outs/conserved_cell_markers_",test_method,".csv"), row.names = FALSE)
 
 ## Conserved inflammatory hallmark genes
 ### Meta-analysis of significant values using `metap` package. Wrapped by the `FindConservedMarkers()` function.
 MIN_P_CUTOFF = 0.01
 PADJ_CUTOFF = 0.1
+test_method = "MAST"
 
 Idents(hpcs.lps) <- "state"
 csvd.state.mks <- FindConservedMarkers(
   object = hpcs.lps, 
   ident.1 = "Inflammation", 
-  grouping.var = "cell_type_brief"
+  grouping.var = "cell_type_brief", 
+  test.use = test_method
 )
 
 csvd.state.mks <- csvd.state.mks %>% 
@@ -97,51 +100,51 @@ csvd.state.mks <- csvd.state.mks %>%
              )
          ) %>%
   relocate(state)
-csvd.state.mks %>% write.csv(file = "../outs/conserved_state_markers.csv", row.names = FALSE)
+csvd.state.mks %>% write.csv(file = paste0("../outs/conserved_state_markers_",test_method,".csv"), row.names = FALSE)
 
 ## Differentially Expressed Markers
 ### `FindMarkers()`
 PADJ_CUTOFF = 0.001
-FC_CUTOFF = 0.8
-method = "MAST"
+FC_CUTOFF = 0.75
+test_method = "MAST"
 
 Idents(hpcs.lps) <- "state"
-som.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Som") %>% FindMarkers(ident.1 = "Inflammation", test.use = method) %>%
+som.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Som") %>% FindMarkers(ident.1 = "Inflammation", test.use = test_method) %>%
   dplyr::filter(p_val_adj <= PADJ_CUTOFF) %>%
   dplyr::filter(avg_log2FC >= FC_CUTOFF | avg_log2FC <= -FC_CUTOFF) %>%
   mutate(state = if_else(avg_log2FC > 0, "Inflammation", "Healthy")) %>%
   relocate(state) %>%
   add_column(.before = 1, cell_type = "Som") %>%
   rownames_to_column("gene")
-lac.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Lac") %>% FindMarkers(ident.1 = "Inflammation") %>%
+lac.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Lac") %>% FindMarkers(ident.1 = "Inflammation", test.use = test_method) %>%
   dplyr::filter(p_val_adj <= PADJ_CUTOFF) %>%
   dplyr::filter(avg_log2FC >= FC_CUTOFF | avg_log2FC <= -FC_CUTOFF) %>%
   mutate(state = if_else(avg_log2FC > 0, "Inflammation", "Healthy")) %>%
   relocate(state) %>%
   add_column(.before = 1, cell_type = "Lac") %>%
   rownames_to_column("gene")
-cort.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Cort") %>% FindMarkers(ident.1 = "Inflammation") %>%
+cort.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Cort") %>% FindMarkers(ident.1 = "Inflammation", test.use = test_method) %>%
   dplyr::filter(p_val_adj <= PADJ_CUTOFF) %>%
   dplyr::filter(avg_log2FC >= FC_CUTOFF | avg_log2FC <= -FC_CUTOFF) %>%
   mutate(state = if_else(avg_log2FC > 0, "Inflammation", "Healthy")) %>%
   relocate(state) %>%
   add_column(.before = 1, cell_type = "Cort") %>%
   rownames_to_column("gene")
-mel.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Mel") %>% FindMarkers(ident.1 = "Inflammation") %>%
+mel.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Mel") %>% FindMarkers(ident.1 = "Inflammation", test.use = test_method) %>%
   dplyr::filter(p_val_adj <= PADJ_CUTOFF) %>%
   dplyr::filter(avg_log2FC >= FC_CUTOFF | avg_log2FC <= -FC_CUTOFF) %>%
   mutate(state = if_else(avg_log2FC > 0, "Inflammation", "Healthy")) %>%
   relocate(state) %>%
   add_column(.before = 1, cell_type = "Mel") %>%
   rownames_to_column("gene")
-gonad.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Gonad") %>% FindMarkers(ident.1 = "Inflammation") %>%
+gonad.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Gonad") %>% FindMarkers(ident.1 = "Inflammation", test.use = test_method) %>%
   dplyr::filter(p_val_adj <= PADJ_CUTOFF) %>%
   dplyr::filter(avg_log2FC >= FC_CUTOFF | avg_log2FC <= -FC_CUTOFF) %>%
   mutate(state = if_else(avg_log2FC > 0, "Inflammation", "Healthy")) %>%
   relocate(state) %>%
   add_column(.before = 1, cell_type = "Gonad") %>%
   rownames_to_column("gene")
-thyro.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Thyro") %>% FindMarkers(ident.1 = "Inflammation") %>%
+thyro.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Thyro") %>% FindMarkers(ident.1 = "Inflammation", test.use = test_method) %>%
   dplyr::filter(p_val_adj <= PADJ_CUTOFF) %>%
   dplyr::filter(avg_log2FC >= FC_CUTOFF | avg_log2FC <= -FC_CUTOFF) %>%
   mutate(state = if_else(avg_log2FC > 0, "Inflammation", "Healthy")) %>%
@@ -155,13 +158,16 @@ de.state.mks <- bind_rows(som.state.mks, lac.state.mks) %>%
   bind_rows(gonad.state.mks) %>%
   bind_rows(thyro.state.mks)
 
-de.state.mks %>% write.csv(file = "../outs/de_state_markers.csv", row.names = FALSE)
+de.state.mks %>% write.csv(file = paste0("../outs/de_state_markers_",test_method,".csv"), row.names = FALSE)
 
 
-# Plot Heatmap
+# Plots
+# Heatmap
 source("DoMultiBarHeatmap.R")
+test_method = "MAST"
 
 ## Conserved Markers
+csvd.cell.mks <- read.csv(file = paste0("../outs/conserved_cell_markers_",test_method,".csv"))
 ### Plot order
 csvd.cell.mks$cell_type <- factor(csvd.cell.mks$cell_type, levels = c("Som","Lac","Cort","Mel","Gonad","Thyro"))
 
@@ -254,6 +260,7 @@ ggsave(
 # )
 
 ## Differentially Expressed Markers
+de.state.mks <- read.csv(file = paste0("../outs/de_state_markers_",test_method,".csv"))
 de.state.mks$cell_type <- factor(de.state.mks$cell_type, levels = c("Som","Lac","Cort","Mel","Gonad","Thyro"))
 de.state.mks$state <- factor(de.state.mks$state, levels = c("Healthy","Inflammation"))
 

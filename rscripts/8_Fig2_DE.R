@@ -1,8 +1,7 @@
 library(Seurat)
 library(SeuratDisk)
 library(tidyverse)
-library(clusterProfiler)
-library(org.Mm.eg.db)
+library(UpSetR)
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
@@ -10,9 +9,11 @@ suppressMessages(
   extrafont::loadfonts(device="postscript")
 )
 
-hpcs.lps <- LoadH5Seurat("data/hpcs_lps_state_marked.h5Seurat")
+hpcs.lps <- LoadH5Seurat("../data/processed/hpcs_lps_state_marked.h5Seurat")
 
+# Statistical Test
 ## Conserved Markers
+### Meta-analysis of significant values using `metap` package. Wrapped by the `FindConservedMarkers()` function.
 MIN_P_CUTOFF = 0.01
 FC_CUTOFF = 0.8
 
@@ -64,6 +65,7 @@ csvd.cell.mks <- bind_rows(som.csvd.mks, lac.csvd.mks) %>%
 csvd.cell.mks %>% write.csv(file = "../outs/conserved_cell_markers.csv", row.names = FALSE)
 
 ## Conserved inflammatory hallmark genes
+### Meta-analysis of significant values using `metap` package. Wrapped by the `FindConservedMarkers()` function.
 MIN_P_CUTOFF = 0.01
 PADJ_CUTOFF = 0.1
 
@@ -97,12 +99,14 @@ csvd.state.mks <- csvd.state.mks %>%
   relocate(state)
 csvd.state.mks %>% write.csv(file = "../outs/conserved_state_markers.csv", row.names = FALSE)
 
-## Differentially Expressed
-PADJ_CUTOFF = 0.01
+## Differentially Expressed Markers
+### `FindMarkers()`
+PADJ_CUTOFF = 0.001
 FC_CUTOFF = 0.8
+method = "MAST"
 
 Idents(hpcs.lps) <- "state"
-som.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Som") %>% FindMarkers(ident.1 = "Inflammation") %>%
+som.state.mks <- subset(hpcs.lps, subset = cell_type_brief == "Som") %>% FindMarkers(ident.1 = "Inflammation", test.use = method) %>%
   dplyr::filter(p_val_adj <= PADJ_CUTOFF) %>%
   dplyr::filter(avg_log2FC >= FC_CUTOFF | avg_log2FC <= -FC_CUTOFF) %>%
   mutate(state = if_else(avg_log2FC > 0, "Inflammation", "Healthy")) %>%
@@ -183,7 +187,7 @@ ggsave(
   filename = "heatmap_csvd_cells_hpcslps.eps",
   plot = heatmap.csvd.cells, 
   device = "eps", 
-  path = "../figures/Fig1/", 
+  path = "../figures/Fig2/", 
   dpi = 300
 )
 heatmap.csvd.cells.clean <- DoMultiBarHeatmap(
@@ -202,7 +206,7 @@ ggsave(
   filename = "heatmap_csvd_cells_hpcslps_clean.eps",
   plot = heatmap.csvd.cells.clean, 
   device = "eps", 
-  path = "../figures/Fig1/", 
+  path = "../figures/Fig2/", 
   dpi = 300
 )
 
@@ -226,7 +230,7 @@ ggsave(
 #   filename = "heatmap_csvd_state_hpcslps.eps",
 #   plot = heatmap.csvd.state, 
 #   device = "eps", 
-#   path = "../figures/Fig1/", 
+#   path = "../figures/Fig2/", 
 #   dpi = 300
 # )
 # heatmap.csvd.state.clean <- DoMultiBarHeatmap(
@@ -245,7 +249,7 @@ ggsave(
 #   filename = "heatmap_csvd_state_hpcslps_clean.eps",
 #   plot = heatmap.csvd.state.clean, 
 #   device = "eps", 
-#   path = "../figures/Fig1/", 
+#   path = "../figures/Fig2/", 
 #   dpi = 300
 # )
 
@@ -254,15 +258,15 @@ de.state.mks$cell_type <- factor(de.state.mks$cell_type, levels = c("Som","Lac",
 de.state.mks$state <- factor(de.state.mks$state, levels = c("Healthy","Inflammation"))
 
 ### Purge duplilcates
-state.mks.uniq <- de.state.mks[!duplicated(de.state.mks$gene),]
+de.state.mks.uniq <- de.state.mks[!duplicated(de.state.mks$gene),]
 
 ### Gene scaling
-hpcs.lps <- ScaleData(hpcs.lps, features = union(VariableFeatures(hpcs.lps), state.mks.uniq$gene))
+hpcs.lps <- ScaleData(hpcs.lps, features = union(VariableFeatures(hpcs.lps), de.state.mks.uniq$gene))
 
 ### Make Plot
 heatmap.de <- DoMultiBarHeatmap(
   hpcs.lps,
-  features = state.mks.uniq %>% arrange(cell_type, state) %>% pull(gene),
+  features = de.state.mks.uniq %>% arrange(cell_type, state) %>% pull(gene),
   label = FALSE,
   group.bar = FALSE,
   group.by = 'cell_type_brief',
@@ -274,12 +278,12 @@ ggsave(
   filename = "heatmap_state_hpcslps.eps",
   plot = heatmap.de, 
   device = "eps", 
-  path = "../figures/Fig1/", 
+  path = "../figures/Fig2/", 
   dpi = 300
 )
 heatmap.de.clean <- DoMultiBarHeatmap(
   hpcs.lps,
-  features = state.mks.uniq %>% arrange(cell_type, state) %>% pull(gene),
+  features = de.state.mks.uniq %>% arrange(cell_type, state) %>% pull(gene),
   label = FALSE,
   group.bar = FALSE,
   group.by = 'cell_type_brief',
@@ -291,97 +295,6 @@ ggsave(
   filename = "heatmap_state_hpcslps_clean.eps",
   plot = heatmap.de.clean, 
   device = "eps", 
-  path = "../figures/Fig1/", 
+  path = "../figures/Fig2/", 
   dpi = 300
 )
-
-# GO analysis
-de.state.mks <- read.csv(file = '../outs/de_state_markers.csv')
-de.state.mks.uniq <- de.state.mks[!duplicated(de.state.mks$gene),]
-
-state.mks.uniq$entrez <- mapIds(
-  x = org.Mm.eg.db, 
-  keys = state.mks.uniq$gene, 
-  column = "ENTREZID", 
-  keytype = "SYMBOL", 
-  multiVals = "first"
-)
-
-input_genes <- state.mks.uniq %>% dplyr::filter(state == "Inflammation") %>% pull(entrez) %>% na.omit()
-background <- mapIds(
-  x = org.Mm.eg.db, 
-  keys = rownames(hpcs.lps), 
-  column = "ENTREZID", 
-  keytype = "SYMBOL", 
-  multiVals = "first"
-) %>% na.omit()
-
-## Cellular Component (CC)
-de_ego.CC <- enrichGO(
-  gene     = input_genes,
-  universe = background,
-  OrgDb    = org.Mm.eg.db,
-  ont      = "CC",
-  pAdjustMethod = "BH",
-  pvalueCutoff = 0.05,
-  qvalueCutoff = 0.05,
-  minGSSize = 10,
-  maxGSSize = 2000,  # To get [GO:0005615] extracellular space and [GO:0005576] extracellular region, tune this value
-  readable = TRUE
-  )
-## Molecular Function (MF)
-de_ego.MF <- enrichGO(
-  gene     = input_genes,
-  universe = background,
-  OrgDb    = org.Mm.eg.db,
-  ont      = "MF",
-  pAdjustMethod = "BH",
-  pvalueCutoff = 0.05,
-  qvalueCutoff = 0.05,
-  readable = TRUE
-)
-## Biological Process (BP)
-de_ego.BP <- enrichGO(
-  gene     = input_genes,
-  universe = background,
-  OrgDb    = org.Mm.eg.db,
-  ont      = "BP",
-  pAdjustMethod = "BH",
-  pvalueCutoff = 0.05,
-  qvalueCutoff = 0.05,
-  readable = TRUE
-)
-
-## Make Plots
-GO_BP_terms_use <- c("GO:0035456","GO:0034341","GO:0019221","GO:0031349","GO:0002237","GO:0071222","GO:0045088","GO:0050727")
-de_ego.BP.filtered <- de_ego.BP %>% dplyr::filter(p.adjust < 0.05) %>% dplyr::filter(ID %in% GO_BP_terms_use)
-
-p1 <- clusterProfiler::dotplot(de_ego.BP.filtered, showCategory = nrow(de_ego.BP.filtered)) +
-  theme(
-    axis.text.y=element_text(size = 11)
-  )
-
-GO_CC_terms_use <- c("GO:0033646","GO:0043657","GO:0005615","GO:0043230","GO:0042824","GO:0030670","GO:0031410","GO:0042612","GO:0009897","GO:0030139","GO:0005789","GO:0048471")
-de_ego.CC.filtered <- de_ego.CC %>% dplyr::filter(p.adjust < 0.05) %>% dplyr::filter(ID %in% GO_CC_terms_use)
-df_tmp <- de_ego.CC.filtered@result
-
-df_tmp <- dplyr::arrange(df_tmp, DOSE::parse_ratio(GeneRatio))
-y_col <- ifelse(df_tmp$ID %in% c("GO:0005615","GO:0005576","GO:0099503"), "red", "black")
-
-p2 <- clusterProfiler::dotplot(de_ego.CC.filtered, showCategory = nrow(de_ego.CC.filtered)) +
-  theme(
-    axis.text.y=element_text(color=y_col, size = 11)
-  )
-
-p <- ggarrange(p1, p2, common.legend = TRUE, legend = "right")
-
-ggsave(
-  filename = "GO.dotplot.eps", 
-  plot = p,
-  device = "eps", 
-  path = '../figures/Fig1/', 
-  width = 240, height = 90, 
-  dpi = 300, 
-  units = "mm", 
-  family = "Arial"
-  )

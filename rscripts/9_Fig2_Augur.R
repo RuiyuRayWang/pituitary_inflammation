@@ -1,8 +1,8 @@
 library(Seurat)
 library(SeuratDisk)
 library(tidyverse)
-library(Augur)
 library(ggrepel)
+library(Augur)
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
@@ -10,8 +10,10 @@ suppressMessages(
   extrafont::loadfonts(device="postscript")
 )
 
+test_method = "MAST"
 hpcs.lps <- LoadH5Seurat(file = "../data/processed/hpcs_lps_state_marked.h5Seurat", verbose = F)
-de.state.mks <- read.csv('../outs/de_state_markers.csv')
+de.state.mks <- read.csv(file = paste0("../outs/de_state_markers_",test_method,".csv"))
+# de.state.mks.uniq <- de.state.mks[!duplicated(de.state.mks$gene),]
 
 hpcs.augur <- calculate_auc(hpcs.lps, cell_type_col = "cell_type_brief", label_col = "state", n_threads = 32)
 
@@ -92,7 +94,7 @@ ggplot(augur.df, aes(x = n_degs, y = auc)) +
   geom_label_repel(data = subset(augur.df, cell_type %in% c("Mel")), aes(label = cell_type),
                    nudge_x = 60,nudge_y = -0.01, box.padding = 0.25, point.padding = 0.4, size = 5, force = 5) +
   geom_label_repel(data = subset(augur.df, cell_type %in% c("Gonad")), aes(label = cell_type), 
-                   nudge_x = 50, nudge_y = 0, box.padding = 0.25, point.padding = 0.4, size = 5, force = 1) +
+                   nudge_x = 80, nudge_y = 0, box.padding = 0.25, point.padding = 0.4, size = 5, force = 1) +
   geom_label_repel(data = subset(augur.df, cell_type %in% c("Thyro")), aes(label = cell_type), 
                    nudge_y = 0.04, box.padding = 0.25, point.padding = 0.4, size = 5, force = 5) +
   xlab("Number of DE genes") +
@@ -101,7 +103,7 @@ ggplot(augur.df, aes(x = n_degs, y = auc)) +
                      breaks = augur.df$cell_type) +
   scale_x_continuous(minor_breaks = seq(0,500,100)) +
   scale_y_continuous(minor_breaks = seq(0,0.9,0.05)) +
-  annotate("text", x = 220, y = 0.92, size = 6,
+  annotate("text", x = 230, y = 0.92, size = 6,
            label = paste0("R = ",round(pearson.res$estimate, digits = 3),", p = ", sprintf("%.5f",pearson.res$p.value)), 
            color = "blue") +
   theme(

@@ -15,7 +15,7 @@ hpcs.lps <- LoadH5Seurat("../data/processed/hpcs_lps_state_marked.h5Seurat")
 ## Conserved Markers
 ### Meta-analysis of significant values using `metap` package. Wrapped by the `FindConservedMarkers()` function.
 MIN_P_CUTOFF = 0.001
-FC_CUTOFF = 0.75
+FC_CUTOFF = 0.65
 test_method = "MAST"
 
 Idents(hpcs.lps) <- "cell_type_brief"
@@ -105,7 +105,7 @@ csvd.state.mks %>% write.csv(file = paste0("../outs/conserved_state_markers_",te
 ## Differentially Expressed Markers
 ### `FindMarkers()`
 PADJ_CUTOFF = 0.001
-FC_CUTOFF = 0.75
+FC_CUTOFF = 0.65
 test_method = "MAST"
 
 Idents(hpcs.lps) <- "state"
@@ -162,13 +162,129 @@ de.state.mks %>% write.csv(file = paste0("../outs/de_state_markers_",test_method
 
 
 # Plots
+# Upset Plot (venn relationship)
+test_method = "MAST"
+
+metadata <- data.frame(
+  sets = c("Som","Lac","Cort","Mel","Gonad","Thyro"),
+  cell_type = c("Som","Lac","Cort","Mel","Gonad","Thyro")
+)
+
+## Conserved Markers
+csvd.cell.mks <- read.csv(file = paste0("../outs/conserved_state_markers_",test_method,".csv"))
+df_csvd_sets <- csvd.cell.mks %>% 
+  dplyr::select(gene, cell_type) %>% 
+  mutate(value = 1) %>%
+  pivot_wider(
+    # id_expand = TRUE,
+    names_from = "cell_type",
+    values_from = "value",
+    values_fill = 0
+  ) %>%
+  as.data.frame()
+
+df_csvd_sets <- df_csvd_sets %>% mutate_if(sapply(df_csvd_sets, is.double), as.integer)
+
+# ragg::agg_tiff(
+#   filename = "../figures/Fig2/upset_csvd.tiff",
+#   width = 1200,
+#   height = 1000,
+#   res = 150
+#   )
+# upset(
+#   df_csvd_sets,
+#   nsets = 6,
+#   text.scale = 2.4
+# )
+# dev.off()
+# svg(
+#   filename = '../figures/Fig2/upset_csvd.svg', 
+#   family = "Arial",
+#   width = 6.4, 
+#   height = 4
+# )
+cairo_ps(
+  filename = '../figures/Fig2/upset_csvd.eps', 
+  family = "Arial",
+  width = 8.4, 
+  height = 7
+  )
+upset(
+  df_csvd_sets,
+  sets = rev(c("Som","Lac","Cort","Mel","Gonad","Thyro")),
+  keep.order = TRUE,
+  nsets = 6,
+  set.metadata = list(
+    data = metadata, 
+    plots = list(
+      list(
+        type = "matrix_rows", 
+        column = "cell_type", 
+        colors = c(Som = "#F8766D", Lac = "#E18A00", Cort = "#00ACFC", Mel = "#00BE70", Gonad = "#8B93FF", Thyro = "#FF65AC"), 
+        alpha = 0.75)
+      )
+    ),
+  matrix.color = "#333333",
+  main.bar.color = "#000066",
+  sets.bar.color = "#000000",
+  show.numbers = F,
+  text.scale = c(3,3,3,2,3,2)
+)
+dev.off()
+
+## Differentially Expressed Markers
+de.state.mks <- read.csv(file = paste0("../outs/de_state_markers_",test_method,".csv"))
+df_destate_sets <- de.state.mks %>% 
+  dplyr::select(gene, cell_type) %>% 
+  mutate(value = 1) %>%
+  pivot_wider(
+    # id_expand = TRUE,
+    names_from = "cell_type",
+    values_from = "value",
+    values_fill = 0
+  ) %>%
+  as.data.frame()
+
+df_destate_sets <- df_destate_sets %>% mutate_if(sapply(df_destate_sets, is.double), as.integer)
+cairo_ps(
+  filename = '../figures/Fig2/upset_de.eps', 
+  family = "Arial",
+  width = 12, 
+  height = 7
+)
+upset(
+  df_destate_sets,
+  sets = rev(c("Som","Lac","Cort","Mel","Gonad","Thyro")),
+  keep.order = TRUE,
+  nsets = 6,
+  set.metadata = list(
+    data = metadata, 
+    plots = list(
+      list(
+        type = "matrix_rows", 
+        column = "cell_type", 
+        colors = c(Som = "#F8766D", Lac = "#E18A00", Cort = "#00ACFC", Mel = "#00BE70", Gonad = "#8B93FF", Thyro = "#FF65AC"), 
+        alpha = 0.75)
+    )
+  ),
+  matrix.color = "#333333",
+  main.bar.color = "#000066",
+  sets.bar.color = "#000000",
+  show.numbers = F,
+  text.scale = c(3,3,3,2,3,2)
+)
+dev.off()
+
 # Heatmap
 source("DoMultiBarHeatmap.R")
 test_method = "MAST"
 
+### Plot order
+hpcs.lps$cell_type_brief <- factor(hpcs.lps$cell_type_brief, levels = c("Som","Lac","Cort","Mel","Gonad","Thyro"))
+hpcs.lps$state <- factor(hpcs.lps$state, levels = c("Healthy","Inflammation"))
+
 ## Conserved Markers
 csvd.cell.mks <- read.csv(file = paste0("../outs/conserved_cell_markers_",test_method,".csv"))
-### Plot order
 csvd.cell.mks$cell_type <- factor(csvd.cell.mks$cell_type, levels = c("Som","Lac","Cort","Mel","Gonad","Thyro"))
 
 ### Purge duplilcates
@@ -187,7 +303,7 @@ heatmap.csvd.cells <- DoMultiBarHeatmap(
   additional.group.by = 'state',
   additional.group.sort.by = 'state'
 ) + 
-  scale_fill_distiller(palette = 'RdYlBu') + 
+  scale_fill_distiller(palette = 'RdYlBu',guide = guide_colorbar(nbin = 1000)) + 
   NoAxes()
 ggsave(
   filename = "heatmap_csvd_cells_hpcslps.eps",

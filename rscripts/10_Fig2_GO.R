@@ -48,7 +48,7 @@ de_ego.CC <- enrichGO(
   pvalueCutoff = 0.05,
   qvalueCutoff = 0.05,
   minGSSize = 10,
-  maxGSSize = 2000,  # To get [GO:0005615] extracellular space and [GO:0005576] extracellular region, tune this value
+  maxGSSize = 2500,  # To get [GO:0005615] extracellular space and [GO:0005576] extracellular region, tune this value
   readable = TRUE
 )
 de_ego.CC@result %>% write.csv("../outs/GO_CC.csv", row.names = FALSE, quote = TRUE)
@@ -92,7 +92,7 @@ de_ego.BP.filtered <- de_ego.BP %>% dplyr::filter(p.adjust < 0.05) %>% dplyr::fi
 
 p1 <- clusterProfiler::dotplot(de_ego.BP.filtered, showCategory = nrow(de_ego.BP.filtered)) +
   scale_x_continuous(
-    breaks = c(0.06,0.07,0.08,0.09)
+    breaks = c(0.05,0.06,0.07,0.08)
       ) +
   scale_y_discrete(
     labels=function(x) str_wrap(x, width=20)
@@ -101,41 +101,7 @@ p1 <- clusterProfiler::dotplot(de_ego.BP.filtered, showCategory = nrow(de_ego.BP
   scale_color_continuous(
     low = "red",
     high = "blue",
-    breaks = c(2e-9, 1e-10),
-    guide = guide_colorbar(reverse=TRUE, nbin = 500)
-  ) +
-  guides(
-    color = guide_colorbar(order = 1, reverse = TRUE),
-    size = guide_legend(order = 2)
-  ) +
-  theme(
-    legend.text = element_text(size = 12, hjust = .1),
-    axis.text.x = element_text(size = 12),
-    axis.title.x = element_text(size = 15), 
-    axis.text.y = element_text(size = 16, lineheight = .8),
-    legend.position = c(.1,-.18),
-    legend.direction = "horizontal",
-    legend.box = "horizontal",
-    plot.margin = unit(c(.2,.2,2,.5),"cm")
-  )
-
-### CC
-GO_CC_terms_use <- c("GO:0033646","GO:0043657","GO:0005615","GO:0043230","GO:0042824","GO:0030670","GO:0031410","GO:0042612","GO:0009897")  ## "GO:0030139","GO:0005789","GO:0048471"
-de_ego.CC.filtered <- de_ego.CC %>% dplyr::filter(p.adjust < 0.05) %>% dplyr::filter(ID %in% GO_CC_terms_use)
-# df_tmp <- de_ego.CC.filtered@result
-# 
-# df_tmp <- dplyr::arrange(df_tmp, DOSE::parse_ratio(GeneRatio))
-# y_col <- ifelse(df_tmp$ID %in% c("GO:0005615","GO:0005576","GO:0099503"), "red", "black")
-
-p2 <- clusterProfiler::dotplot(de_ego.CC.filtered, showCategory = nrow(de_ego.CC.filtered)) +
-  scale_y_discrete(
-    labels=function(x) str_wrap(x, width=20)
-    ) +
-  scale_size(breaks = c(20,60)) +
-  scale_color_continuous(
-    low = "red",
-    high = "blue",
-    breaks = c(0.002, 0.0002),
+    breaks = c(8e-9, 2e-9),
     guide = guide_colorbar(reverse=TRUE, nbin = 500)
   ) +
   guides(
@@ -163,6 +129,43 @@ ggsave(
   units = "mm",
   family = "Arial"
 )
+
+### CC
+GO_CC_terms_use <- c("GO:0033646","GO:0043657","GO:0005615","GO:0043230","GO:0005576","GO:0030670","GO:0031410","GO:0042612","GO:0009897")  ## "GO:0030139","GO:0005789","GO:0048471"
+de_ego.CC.filtered <- de_ego.CC %>% dplyr::filter(p.adjust < 0.05) %>% dplyr::filter(ID %in% GO_CC_terms_use)
+# df_tmp <- de_ego.CC.filtered@result
+# 
+# df_tmp <- dplyr::arrange(df_tmp, DOSE::parse_ratio(GeneRatio))
+# y_col <- ifelse(df_tmp$ID %in% c("GO:0005615","GO:0005576","GO:0099503"), "red", "black")
+
+p2 <- clusterProfiler::dotplot(de_ego.CC.filtered, showCategory = nrow(de_ego.CC.filtered)) +
+  scale_x_continuous(
+    breaks = c(0.00,0.05,0.10,0.15)
+  ) +
+  scale_y_discrete(
+    labels=function(x) str_wrap(x, width=20)
+    ) +
+  scale_size(breaks = c(30,60)) +
+  scale_color_continuous(
+    low = "red",
+    high = "blue",
+    breaks = c(0.0075, 0.0025),
+    guide = guide_colorbar(reverse=TRUE, nbin = 500)
+  ) +
+  guides(
+    color = guide_colorbar(order = 1, reverse = TRUE),
+    size = guide_legend(order = 2)
+  ) +
+  theme(
+    legend.text = element_text(size = 12, hjust = .1),
+    axis.text.x = element_text(size = 12),
+    axis.title.x = element_text(size = 15), 
+    axis.text.y = element_text(size = 16, lineheight = .8),
+    legend.position = c(.1,-.18),
+    legend.direction = "horizontal",
+    legend.box = "horizontal",
+    plot.margin = unit(c(.2,.2,2,.5),"cm")
+  )
 
 ggsave(
   filename = "GO_CC_dotplot.eps",

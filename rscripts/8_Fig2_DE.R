@@ -171,7 +171,7 @@ metadata <- data.frame(
 )
 
 ## Conserved Markers
-csvd.cell.mks <- read.csv(file = paste0("../outs/conserved_state_markers_",test_method,".csv"))
+csvd.cell.mks <- read.csv(file = paste0("../outs/conserved_cell_markers_",test_method,".csv"))
 df_csvd_sets <- csvd.cell.mks %>% 
   dplyr::select(gene, cell_type) %>% 
   mutate(value = 1) %>%
@@ -294,6 +294,25 @@ csvd.cell.mks <- csvd.cell.mks[!duplicated(csvd.cell.mks$gene),]
 hpcs.lps <- ScaleData(hpcs.lps, features = union(VariableFeatures(hpcs.lps), csvd.cell.mks$gene))
 
 ### Make Plot
+heatmap.csvd.cells.clean <- DoMultiBarHeatmap(
+  hpcs.lps,
+  features = csvd.cell.mks$gene,
+  label = FALSE,
+  group.bar = FALSE,
+  group.by = 'cell_type_brief',
+  additional.group.by = 'state',
+  additional.group.sort.by = 'state'
+) + 
+  scale_fill_distiller(palette = 'RdYlBu') +
+  NoLegend() + 
+  NoAxes()  # Remove gene names
+ggsave(
+  filename = "heatmap_csvd_cells_hpcslps_clean.eps",
+  plot = heatmap.csvd.cells.clean, 
+  device = "eps", 
+  path = "../figures/Fig2/", 
+  dpi = 300
+)
 heatmap.csvd.cells <- DoMultiBarHeatmap(
   hpcs.lps,
   features = csvd.cell.mks$gene,
@@ -308,25 +327,6 @@ heatmap.csvd.cells <- DoMultiBarHeatmap(
 ggsave(
   filename = "heatmap_csvd_cells_hpcslps.eps",
   plot = heatmap.csvd.cells, 
-  device = "eps", 
-  path = "../figures/Fig2/", 
-  dpi = 300
-)
-heatmap.csvd.cells.clean <- DoMultiBarHeatmap(
-  hpcs.lps,
-  features = csvd.cell.mks$gene,
-  label = FALSE,
-  group.bar = FALSE,
-  group.by = 'cell_type_brief',
-  additional.group.by = 'state',
-  additional.group.sort.by = 'state'
-  ) + 
-  scale_fill_distiller(palette = 'RdYlBu') +
-  NoLegend() + 
-  NoAxes()  # Remove gene names
-ggsave(
-  filename = "heatmap_csvd_cells_hpcslps_clean.eps",
-  plot = heatmap.csvd.cells.clean, 
   device = "eps", 
   path = "../figures/Fig2/", 
   dpi = 300
@@ -387,23 +387,6 @@ de.state.mks.uniq <- de.state.mks[!duplicated(de.state.mks$gene),]
 hpcs.lps <- ScaleData(hpcs.lps, features = union(VariableFeatures(hpcs.lps), de.state.mks.uniq$gene))
 
 ### Make Plot
-heatmap.de <- DoMultiBarHeatmap(
-  hpcs.lps,
-  features = de.state.mks.uniq %>% arrange(cell_type, state) %>% pull(gene),
-  label = FALSE,
-  group.bar = FALSE,
-  group.by = 'cell_type_brief',
-  additional.group.by = 'state',
-  additional.group.sort.by = 'state') + 
-  scale_fill_distiller(palette = 'PiYG') +
-  NoAxes()
-ggsave(
-  filename = "heatmap_state_hpcslps.eps",
-  plot = heatmap.de, 
-  device = "eps", 
-  path = "../figures/Fig2/", 
-  dpi = 300
-)
 heatmap.de.clean <- DoMultiBarHeatmap(
   hpcs.lps,
   features = de.state.mks.uniq %>% arrange(cell_type, state) %>% pull(gene),
@@ -417,6 +400,23 @@ heatmap.de.clean <- DoMultiBarHeatmap(
 ggsave(
   filename = "heatmap_state_hpcslps_clean.eps",
   plot = heatmap.de.clean, 
+  device = "eps", 
+  path = "../figures/Fig2/", 
+  dpi = 300
+)
+heatmap.de <- DoMultiBarHeatmap(
+  hpcs.lps,
+  features = de.state.mks.uniq %>% arrange(cell_type, state) %>% pull(gene),
+  label = FALSE,
+  group.bar = FALSE,
+  group.by = 'cell_type_brief',
+  additional.group.by = 'state',
+  additional.group.sort.by = 'state') + 
+  scale_fill_distiller(palette = 'PiYG') +
+  NoAxes()
+ggsave(
+  filename = "heatmap_state_hpcslps.eps",
+  plot = heatmap.de, 
   device = "eps", 
   path = "../figures/Fig2/", 
   dpi = 300

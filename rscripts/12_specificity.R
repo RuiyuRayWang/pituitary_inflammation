@@ -3,7 +3,12 @@ library(SeuratDisk)
 library(tidyverse)
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+suppressMessages(
+  extrafont::loadfonts(device="postscript")
+)
+
 source("utilities.R")
+
 
 hpcs.lps <- LoadH5Seurat("../data/processed/hpcs_lps_state_marked.h5Seurat")
 

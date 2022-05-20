@@ -15,7 +15,7 @@ if(!file.exists('../data/GSE132642/GSE132642_RAW.tar')){
 
 ### TODO: untar GSE, get meta
 
-meta <- read.csv(file.path(wd,"Hilton_spleen","pbio.3000528.s031.csv"))
+meta <- read.csv("../data/GSE132642/pbio.3000528.s031.csv")
 meta$cell <- sub(pattern = "-", replacement = ".", meta$cell)
 meta$cell <- sub(pattern = "^([^\\.]*\\.[^\\.]*\\.[^\\.]*\\.[^\\.]*)\\.", replacement = "\\1_", meta$cell)
 tab <- read.table('/mnt/ZA1BT1ER/yanting/pituitary_scRNAseq_analysis/QC/gencode.vM21.annotation.tab', col.names = c("ens_id","symbol"))

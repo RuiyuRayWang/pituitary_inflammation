@@ -13,13 +13,16 @@ if(!file.exists('../data/GSE132642/GSE132642_RAW.tar')){
   getGEOSuppFiles(GEO = "GSE132642", makeDirectory = T, baseDir = "../data/")
 }
 
-untar(tarfile = '../data/GSE132642/GSE132642_RAW.tar', 
-      files = c("GSM3885345_mouse.spleen.LPS_1_1.csv.gz",
-                "GSM3885346_mouse.spleen.LPS_1_2.csv.gz",
-                "GSM3885347_mouse.spleen.LPS_2_1.csv.gz",
-                "GSM3885348_mouse.spleen.LPS_2_2.csv.gz"),
-      exdir = "../data/GSE132642/", 
-)
+target_files = c("GSM3885345_mouse.spleen.LPS_1_1.csv.gz",
+                 "GSM3885346_mouse.spleen.LPS_1_2.csv.gz",
+                 "GSM3885347_mouse.spleen.LPS_2_1.csv.gz",
+                 "GSM3885348_mouse.spleen.LPS_2_2.csv.gz")
+if(any(!file.exists(paste0("../data/GSE132642/", target_files)))){
+  untar(tarfile = '../data/GSE132642/GSE132642_RAW.tar', 
+        files = target_files,
+        exdir = "../data/GSE132642/", 
+  )
+}
 
 ## Load data
 data <- rownames_to_column(read.csv(file = "../data/GSE132642/GSM3885345_mouse.spleen.LPS_1_1.csv.gz", row.names = 1), "ens_id") %>%
@@ -76,22 +79,30 @@ cells <- as.Seurat(cells.sce, data = NULL)
 cells[["nCount_originalexp"]] <- NULL; cells[["nFeature_originalexp"]] <- NULL
 cells <- RenameAssays(cells, originalexp = "RNA")
 
-# Standard Seurat Workflow
-dim_use = 1:50
-cells <- NormalizeData(cells) %>%
-  FindVariableFeatures() %>%
-  ScaleData() %>%
-  RunPCA() %>%
-  FindNeighbors(dims = dim_use) %>%
-  FindClusters() %>%
-  RunUMAP(dims = dim_use)
+# # Standard Seurat Workflow
+# dim_use = 1:50
+# cells <- NormalizeData(cells) %>%
+#   FindVariableFeatures() %>%
+#   ScaleData() %>%
+#   RunPCA() %>%
+#   FindNeighbors(dims = dim_use) %>%
+#   FindClusters() %>%
+#   RunUMAP(dims = dim_use)
 
-## Parse Seurat metadata slot
+## Edit and complete metadata
 Idents(cells) <- "converged.cell.type"
 cells <- RenameIdents(cells, `T-cell` = "T cells", `Plasmacytoid-dendritic-cell` = "pDCs", `NK-cell` = "NK cells",
                       `B-cell` = "B cells", `Macrophage` = "Macrophages", `Monocyte` = "Monocytes", `Neutrophil` = "Neutrophils", 
                       `Plasma-cell` = "Plasma B cells")
 cells[["cell_type"]] <- Idents(cells)
+
+Idents(cells) <- "converged.cell.type"
+cells <- RenameIdents(cells, `T-cell` = "T", `Plasmacytoid-dendritic-cell` = "pDCs", `NK-cell` = "NK",
+                      `B-cell` = "B", `Macrophage` = "Macro", `Monocyte` = "Mono", `Neutrophil` = "Neut", 
+                      `Plasma-cell` = "Plasma")
+cells[["cell_type_brief"]] <- Idents(cells)
+
 cells[["treat"]] <- "LPS"
+cells[["state"]] <- "Inflammation"
 
 SaveH5Seurat(object = cells, filename = "../data/GSE132642/hilton_mouse_spleen_lps.h5Seurat", overwrite = T)

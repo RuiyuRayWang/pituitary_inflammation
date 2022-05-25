@@ -1,45 +1,51 @@
 library(Seurat)
 library(SeuratDisk)
-library(CellChat)
-library(patchwork)
 library(tidyverse)
+library(CellChat)
+library(future)
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
-suppressMessages(
-  extrafont::loadfonts(device="postscript")
-)
-
 # Part I: Data input & processing and initialization of CellChat object
 ## Load data
-hpcs.lps <- LoadH5Seurat("../data/processed/hpcs_lps_state_marked.h5Seurat")
-hpcs.lps.healthy <- subset(hpcs.lps, subset = state == "Healthy")
+hpcs.lps <- LoadH5Seurat("../data/processed/hpcs_lps_state_marked.h5Seurat", verbose = F)
+hpcs.lps[["cell_type"]] <- hpcs.lps[["cell_type_refined"]]
+hpcs.healthy <- subset(hpcs.lps, subset = state == "Healthy")
+hpcs.healthy[["tissue"]] <- "Pituitary"
+hpcs.healthy[["study"]] <- "Yan"
 
-### Normalized data (e.g., library-size normalization and then log-transformed with a pseudocount of 1) is required as input for CellChat analysis.
-data.input = GetAssayData(hpcs.lps.healthy, slot = "data", assay = "RNA")
-meta <- hpcs.lps.healthy@meta.data
+hilton.saline <- LoadH5Seurat("../data/GSE132642/hilton_mouse_spleen_saline.h5Seurat", verbose = F)
+hilton.saline[["tissue"]] <- "Spleen"
+hilton.saline[["study"]] <- "Hilton"
+
+cells.use <- merge(x = hpcs.healthy, y = hilton.saline)
+
+## Extract CellChat input files from Seurat object
+data.input <- GetAssayData(cells.use, assay = "RNA", slot = "data") # normalized data matrix
+labels <- as.factor(cells.use$cell_type)
+meta <- data.frame(labels = labels, row.names = names(labels)) # create a dataframe of the cell labels
+unique(meta$labels) # check the cell labels
 
 ## Create a CellChat object
-cellchat <- createCellChat(object = data.input, meta = meta, group.by = "cell_type_brief")
+cellchat <- createCellChat(object = data.input, meta = meta, group.by = "labels")
 
 ## Set the ligand-receptor interaction database
-CellChatDB <- CellChatDB.mouse
+CellChatDB <- CellChatDB.mouse # use CellChatDB.human if running on human data
 showDatabaseCategory(CellChatDB)
-
-### Show the structure of the database
+# Show the structure of the database
 dplyr::glimpse(CellChatDB$interaction)
 
 ### use a subset of CellChatDB for cell-cell communication analysis
-# CellChatDB.use <- subsetDB(CellChatDB, search = "Secreted Signaling") # use Secreted Signaling
+CellChatDB.use <- subsetDB(CellChatDB, search = "Secreted Signaling") # use Secreted Signaling
 # use all CellChatDB for cell-cell communication analysis
-CellChatDB.use <- CellChatDB # simply use the default CellChatDB
+# CellChatDB.use <- CellChatDB # simply use the default CellChatDB
 
 ### set the used database in the object
 cellchat@DB <- CellChatDB.use
 
 # subset the expression data of signaling genes for saving computation cost
 cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
-future::plan("multiprocess", workers = 16) # do parallel
+plan(multisession, workers = 8) # do parallel
 cellchat <- identifyOverExpressedGenes(cellchat)
 cellchat <- identifyOverExpressedInteractions(cellchat)
 # # Optional: project gene expression data onto PPI (when running it, USER should set `raw.use = FALSE` in the function `computeCommunProb()` in order to use the projected data)
@@ -75,8 +81,9 @@ cellchat <- aggregateNet(cellchat)
 
 ### Compute and visualize the network centrality scores
 # Compute the network centrality scores
+plan(sequential)
 cellchat <- netAnalysis_computeCentrality(cellchat, slot.name = "netP") # the slot 'netP' means the inferred intercellular communication network of signaling pathways
 
 
 # Part V: Save the CellChat object
-saveRDS(cellchat, file = "../data/cellchat/cellchat_hpcslps_healthy.rds")
+saveRDS(cellchat, file = "../data/cellchat/cellchat_pituitary_spleen_healthy.rds")

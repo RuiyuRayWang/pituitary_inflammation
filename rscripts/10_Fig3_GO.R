@@ -14,9 +14,37 @@ suppressMessages(
 hpcs.lps <- LoadH5Seurat("../data/processed/hpcs_lps_state_marked.h5Seurat")
 
 test_method = "MAST"
+de.state.mks <- read.csv(file = paste0("../outs/de_state_markers_",test_method,".csv"))
+
+
+FC_cutoff = 1
+p_cutoff = 10^-1.3
+EnhancedVolcano(ms_dat,
+                lab = ms_dat$gene,
+                selectLab = c("Hmox1","Vegfa","Eif2ak1","Eif2ak3","Dusp1","Trib3","Ddit4","Ddit3","Ppp1r15a"),
+                x = "FC",
+                y = "Pvalue",
+                xlim = c(-8,9),
+                ylim = c(0,7),
+                labSize = 4,
+                pointSize = 2.5,
+                pCutoff = 10^-1.3,
+                FCcutoff = 1,
+                colCustom = keyvals,
+                colAlpha = 1,
+                xlab = bquote(~Log[2]~ 'fold change: LPS/Saline'),
+                title = NULL,
+                subtitle = NULL,
+                caption = NULL,
+                drawConnectors = TRUE,
+                widthConnectors = 0.6,
+                arrowhead = FALSE,
+                colConnectors = "black",
+                legendPosition = "right"
+) +
+  theme(panel.border = element_rect(fill = NA))
 
 # GO analysis
-de.state.mks <- read.csv(file = paste0("../outs/de_state_markers_",test_method,".csv"))
 de.state.mks.uniq <- de.state.mks[!duplicated(de.state.mks$gene),]
 # de.state.mks$initial <- substr(de.state.mks$cell_type, start=1, stop =1)
 # de.state.mks <- de.state.mks %>% dplyr::group_by(gene) %>% dplyr::mutate(venn_relation = paste0(initial, collapse = ":")) %>% dplyr::select(-c(initial)) %>% dplyr::distinct()
@@ -92,12 +120,12 @@ de_ego.BP.filtered <- de_ego.BP %>% dplyr::filter(p.adjust < 0.05) %>% dplyr::fi
 
 p1 <- clusterProfiler::dotplot(de_ego.BP.filtered, showCategory = nrow(de_ego.BP.filtered)) +
   scale_x_continuous(
-    breaks = c(0.05,0.06,0.07,0.08)
+    breaks = c(0.05,0.06,0.07,0.08,0.09)
       ) +
   scale_y_discrete(
     labels=function(x) str_wrap(x, width=20)
     ) +
-  scale_size(breaks = c(25,35)) +
+  # scale_size(breaks = c(25,35)) +
   scale_color_continuous(
     low = "red",
     high = "blue",
@@ -109,22 +137,19 @@ p1 <- clusterProfiler::dotplot(de_ego.BP.filtered, showCategory = nrow(de_ego.BP
     size = guide_legend(order = 2)
   ) +
   theme(
-    legend.text = element_text(size = 12, hjust = .1),
-    axis.text.x = element_text(size = 12),
-    axis.title.x = element_text(size = 15), 
-    axis.text.y = element_text(size = 16, lineheight = .8),
-    legend.position = c(.1,-.18),
-    legend.direction = "horizontal",
-    legend.box = "horizontal",
-    plot.margin = unit(c(.2,.2,2,.5),"cm")
+    legend.title = element_text(size = 18, hjust = .1),
+    legend.text = element_text(size = 16, hjust = .1),
+    axis.text.x = element_text(size = 16),
+    axis.title.x = element_text(size = 20), 
+    axis.text.y = element_text(size = 18, lineheight = .8)
   )
 
 ggsave(
   filename = "GO_BP_dotplot.eps",
   plot = p1,
   device = "eps",
-  path = '../figures/Fig2/',
-  width = 120, height = 150,
+  path = '../figures/Fig3/',
+  width = 160, height = 150,
   dpi = 300,
   units = "mm",
   family = "Arial"
@@ -140,12 +165,12 @@ de_ego.CC.filtered <- de_ego.CC %>% dplyr::filter(p.adjust < 0.05) %>% dplyr::fi
 
 p2 <- clusterProfiler::dotplot(de_ego.CC.filtered, showCategory = nrow(de_ego.CC.filtered)) +
   scale_x_continuous(
-    breaks = c(0.00,0.05,0.10,0.15)
+    breaks = c(0.00,0.05,0.10,0.15,0.20)
   ) +
   scale_y_discrete(
     labels=function(x) str_wrap(x, width=20)
     ) +
-  scale_size(breaks = c(30,60)) +
+  # scale_size(breaks = c(30,60)) +
   scale_color_continuous(
     low = "red",
     high = "blue",
@@ -157,22 +182,19 @@ p2 <- clusterProfiler::dotplot(de_ego.CC.filtered, showCategory = nrow(de_ego.CC
     size = guide_legend(order = 2)
   ) +
   theme(
-    legend.text = element_text(size = 12, hjust = .1),
-    axis.text.x = element_text(size = 12),
-    axis.title.x = element_text(size = 15), 
-    axis.text.y = element_text(size = 16, lineheight = .8),
-    legend.position = c(.1,-.18),
-    legend.direction = "horizontal",
-    legend.box = "horizontal",
-    plot.margin = unit(c(.2,.2,2,.5),"cm")
+    legend.title = element_text(size = 18, hjust = .1),
+    legend.text = element_text(size = 16, hjust = .1),
+    axis.text.x = element_text(size = 16),
+    axis.title.x = element_text(size = 20), 
+    axis.text.y = element_text(size = 18, lineheight = .8)
   )
 
 ggsave(
   filename = "GO_CC_dotplot.eps",
   plot = p2,
   device = "eps",
-  path = '../figures/Fig2/',
-  width = 120, height = 150,
+  path = '../figures/Fig3/',
+  width = 160, height = 150,
   dpi = 300,
   units = "mm",
   family = "Arial"

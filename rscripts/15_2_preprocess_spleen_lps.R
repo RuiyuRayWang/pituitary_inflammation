@@ -93,13 +93,13 @@ cells <- RenameAssays(cells, originalexp = "RNA")
 Idents(cells) <- "converged.cell.type"
 cells <- RenameIdents(cells, `T-cell` = "T cells", `Plasmacytoid-dendritic-cell` = "pDCs", `NK-cell` = "NK cells",
                       `B-cell` = "B cells", `Macrophage` = "Macrophages", `Monocyte` = "Monocytes", `Neutrophil` = "Neutrophils", 
-                      `Plasma-cell` = "Plasma B cells")
+                      `Plasma-cell` = "B cells")
 cells[["cell_type"]] <- Idents(cells)
 
 Idents(cells) <- "converged.cell.type"
 cells <- RenameIdents(cells, `T-cell` = "T", `Plasmacytoid-dendritic-cell` = "pDCs", `NK-cell` = "NK",
                       `B-cell` = "B", `Macrophage` = "Macro", `Monocyte` = "Mono", `Neutrophil` = "Neut", 
-                      `Plasma-cell` = "Plasma")
+                      `Plasma-cell` = "B")
 cells[["cell_type_brief"]] <- Idents(cells)
 
 cells[["treat"]] <- "LPS"

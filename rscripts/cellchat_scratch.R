@@ -84,7 +84,28 @@ gg2 <- compareInteractions(cellchat, show.legend = F, group = c(1,2), measure = 
   theme(text = element_text(size = 16))
 gg1 + gg2
 
+### Part 2: The interaction between which cell types is significantly changed
+group.cellType <- factor(group.cellType, levels = c("Pituitary","Spleen"))
+object.list <- lapply(object.list, function(x){mergeInteractions(x, group.cellType)})
+cellchat <- mergeCellChat(object.list, add.names = names(object.list))
 
+weight.max <- getMaxWeight(object.list, slot.name = c("idents", "net", "net"), attribute = c("idents", "counts", "count.merged"))
+svglite::svglite(file.path(wd, "cellchat", "comparison", "interaction_aggregate.svg"), width = 9, height = 4)
+par(mfrow = c(1,2), xpd=TRUE)
+for (i in 1:length(object.list)) {
+  netVisual_circle(object.list[[i]]@net$count.merged, weight.scale = T, label.edge= T, edge.weight.max = weight.max[3], edge.width.max = 12, title.name = paste0("Number of interactions - ", names(object.list)[i]))
+}
+dev.off()
 
+netVisual_bubble(cellchat, sources.use = 2, targets.use = c(1,5,7,8,9,10,12),  comparison = c(1, 2), angle.x = 45)
+# ggsave(filename = "comp_cort_pituitary_bubble.eps", device = "eps", plot = last_plot(), width = 6, height = 5, dpi = 300, 
+#        path = file.path(out_dir,"comparison"))
 
+# gg1 <- netVisual_bubble(cellchat, sources.use = 2, targets.use = c(1,5,7,8,9,10,12),  comparison = c(1, 2), max.dataset = 2, title.name = "Increased signaling in LPS", angle.x = 45, remove.isolate = T)
+# #> Comparing communications on a merged object
+# gg2 <- netVisual_bubble(cellchat, sources.use = 2, targets.use = c(1,5,7,8,9,10,12),  comparison = c(1, 2), max.dataset = 1, title.name = "Decreased signaling in LPS", angle.x = 45, remove.isolate = T)
+# #> Comparing communications on a merged object
+# gg1 + gg2
+# ggsave(filename = "comp_cort_pituitary_bubble_paired.eps", device = "eps", plot = last_plot(), width = 9, height = 5, dpi = 300, 
+#        path = file.path(out_dir,"comparison"))
 

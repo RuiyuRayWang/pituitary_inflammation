@@ -45,7 +45,7 @@ cellchat@DB <- CellChatDB.use
 
 # subset the expression data of signaling genes for saving computation cost
 cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
-plan(multisession, workers = 8) # do parallel
+future::plan("multiprocess", workers = 8) # do parallel
 cellchat <- identifyOverExpressedGenes(cellchat)
 cellchat <- identifyOverExpressedInteractions(cellchat)
 # # Optional: project gene expression data onto PPI (when running it, USER should set `raw.use = FALSE` in the function `computeCommunProb()` in order to use the projected data)
@@ -53,7 +53,7 @@ cellchat <- identifyOverExpressedInteractions(cellchat)
 
 
 # Part II: Inference of cell-cell communication network
-cellchat <- computeCommunProb(cellchat, raw.use = T, population.size = F)
+cellchat <- computeCommunProb(cellchat, raw.use = T, population.size = FALSE)
 # Filter out the cell-cell communication if there are only few number of cells in certain cell groups
 cellchat <- filterCommunication(cellchat, min.cells = 10)
 

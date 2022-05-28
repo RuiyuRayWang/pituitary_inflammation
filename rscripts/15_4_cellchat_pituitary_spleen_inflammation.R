@@ -53,7 +53,7 @@ cellchat <- identifyOverExpressedInteractions(cellchat)
 
 
 # Part II: Inference of cell-cell communication network
-cellchat <- computeCommunProb(cellchat)
+cellchat <- computeCommunProb(cellchat, raw.use = T, population.size = F)
 # Filter out the cell-cell communication if there are only few number of cells in certain cell groups
 cellchat <- filterCommunication(cellchat, min.cells = 10)
 

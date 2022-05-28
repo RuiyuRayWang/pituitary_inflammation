@@ -12,17 +12,11 @@ cellchat.lps <- readRDS("../data/cellchat/cellchat_pituitary_spleen_inflammation
 df.net.saline <- subsetCommunication(cellchat.saline)
 df.net.lps <- subsetCommunication(cellchat.lps)
 
-group.cellType.saline <- c("Spleen","Pituitary","Pituitary","Pituitary","Spleen","Pituitary","Spleen","Spleen","Spleen","Spleen","Pituitary","Spleen","Pituitary")
-names(group.cellType.saline) <- levels(cellchat.saline@idents)
-group.cellType.saline
-pit.saline.group.idx <- which(group.cellType.saline == "Pituitary")
-spleen.saline.group.idx <- which(group.cellType.saline == "Spleen")
-
-group.cellType.lps <- c("Spleen","Pituitary","Pituitary","Pituitary","Spleen","Pituitary","Spleen","Spleen","Spleen","Spleen","Pituitary","Spleen","Pituitary")
-names(group.cellType.lps) <- levels(cellchat.lps@idents)
-group.cellType.saline
-pit.saline.group.idx <- which(group.cellType.saline == "Pituitary")
-spleen.saline.group.idx <- which(group.cellType.saline == "Spleen")
+group.cellType <- c("Spleen","Pituitary","Pituitary","Pituitary","Spleen","Pituitary","Spleen","Spleen","Spleen","Spleen","Pituitary","Spleen","Pituitary")
+names(group.cellType) <- levels(cellchat.saline@idents)
+group.cellType
+pit.group.idx <- which(group.cellType == "Pituitary")
+spleen.group.idx <- which(group.cellType == "Spleen")
 
 groupSize <- as.numeric(table(cellchat.saline@idents))
 par(mfrow = c(1,2), xpd=TRUE)
@@ -77,27 +71,18 @@ for (i in 1:length(pathways.show.all.lps)){
   )
 }
 
+## Comparative analysis
+object.list <- list(Saline = cellchat.saline, LPS = cellchat.lps)
+cellchat <- mergeCellChat(object.list, add.names = names(object.list))
 
-pathways.show.all <- cellchat@netP$pathways
-
-cellchat@idents <- factor(x = cellchat@idents, levels = c(
-  "B cells", "T cells", "NK cells", "pDCs", 
-  "Somatotropes", "Lactotropes", "Corticotropes", "Melanotropes", "Gonadotropes", "Thyrotropes", 
-  "Monocytes", "Macrophages", "Neutrophils"
-))
-vertex.receiver = c(5,6,7,8,9,0)
-par(mfrow = c(1,1), xpd=TRUE)
-for (i in 1:length(pathways.show.all)){
-  netVisual_aggregate(cellchat, signaling = pathways.show.all[i], vertex.receiver = vertex.receiver, layout = "circle")
-  netVisual_aggregate(cellchat, signaling = pathways.show.all[i], vertex.receiver = vertex.receiver, layout = "circle", cell.order = c(
-    "B cells", "T cells", "NK cells", "pDCs", 
-    "Somatotropes", "Lactotropes", "Corticotropes", "Melanotropes", "Gonadotropes", "Thyrotropes", 
-    "Monocytes", "Macrophages", "Neutrophils"
-  ))
-  netVisual_aggregate(cellchat, signaling = pathways.show.all[i], vertex.receiver = vertex.receiver, layout = "hierarchy")
-  netAnalysis_contribution(cellchat, signaling = pathways.show.all[i])
-}
-
+### Part 1: Whether the cell-cell communication is enhanced or not
+gg1 <- compareInteractions(cellchat, show.legend = F, group = c(1,2)) +
+  scale_y_continuous(expand = c(0,0), limits = c(0, 1300)) +
+  theme(text = element_text(size = 16))
+gg2 <- compareInteractions(cellchat, show.legend = F, group = c(1,2), measure = "weight") +
+  scale_y_continuous(expand = c(0,0), limits = c(0, 100)) +
+  theme(text = element_text(size = 16))
+gg1 + gg2
 
 
 

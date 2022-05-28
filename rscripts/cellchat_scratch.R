@@ -75,6 +75,7 @@ for (i in 1:length(pathways.show.all.lps)){
 object.list <- list(Saline = cellchat.saline, LPS = cellchat.lps)
 cellchat <- mergeCellChat(object.list, add.names = names(object.list))
 
+
 ### Part 1: Whether the cell-cell communication is enhanced or not
 gg1 <- compareInteractions(cellchat, show.legend = F, group = c(1,2)) +
   scale_y_continuous(expand = c(0,0), limits = c(0, 1300)) +

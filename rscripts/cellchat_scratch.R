@@ -14,6 +14,7 @@ df.net.lps <- subsetCommunication(cellchat.lps)
 
 group.cellType <- c("Spleen","Pituitary","Pituitary","Pituitary","Spleen","Pituitary","Spleen","Spleen","Spleen","Spleen","Pituitary","Spleen","Pituitary")
 names(group.cellType) <- levels(cellchat.saline@idents)
+# names(group.cellType) <- c("B","Cort","Gonad","Lac","Macro","Mel","Mono","Neut","NK","pDC","Som","T","Thyro")
 group.cellType
 pit.group.idx <- which(group.cellType == "Pituitary")
 spleen.group.idx <- which(group.cellType == "Spleen")
@@ -91,7 +92,7 @@ object.list <- lapply(object.list, function(x){mergeInteractions(x, group.cellTy
 cellchat <- mergeCellChat(object.list, add.names = names(object.list))
 
 weight.max <- getMaxWeight(object.list, slot.name = c("idents", "net", "net"), attribute = c("idents", "counts", "count.merged"))
-svglite::svglite(file.path(wd, "cellchat", "comparison", "interaction_aggregate.svg"), width = 9, height = 4)
+svglite::svglite(file.path("../outs/cellchat", "interaction_aggregate.svg"), width = 9, height = 4)
 par(mfrow = c(1,2), xpd=TRUE)
 for (i in 1:length(object.list)) {
   netVisual_circle(object.list[[i]]@net$count.merged, weight.scale = T, label.edge= T, edge.weight.max = weight.max[3], edge.width.max = 12, title.name = paste0("Number of interactions - ", names(object.list)[i]))

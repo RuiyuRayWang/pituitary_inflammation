@@ -89,6 +89,9 @@ cells <- RenameAssays(cells, originalexp = "RNA")
 #   FindClusters() %>%
 #   RunUMAP(dims = dim_use)
 
+## CellChat requires normalized data as input
+cells <- NormalizeData(cells)
+
 ## Edit and complete metadata
 Idents(cells) <- "converged.cell.type"
 cells <- RenameIdents(cells, `T-cell.1` = "T cells", `T-cell.2` = "T cells", `Plasmacytoid-dendritic-cell` = "pDCs", `NK-cell` = "NK cells",

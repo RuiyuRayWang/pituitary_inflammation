@@ -45,15 +45,15 @@ cellchat@DB <- CellChatDB.use
 
 # subset the expression data of signaling genes for saving computation cost
 cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
-future::plan("multiprocess", workers = 8) # do parallel
+future::plan("multiprocess", workers = 24) # do parallel
 cellchat <- identifyOverExpressedGenes(cellchat)
 cellchat <- identifyOverExpressedInteractions(cellchat)
 # # Optional: project gene expression data onto PPI (when running it, USER should set `raw.use = FALSE` in the function `computeCommunProb()` in order to use the projected data)
-# cellchat <- projectData(cellchat, PPI.human)
+cellchat <- projectData(cellchat, PPI.mouse)
 
 
 # Part II: Inference of cell-cell communication network
-cellchat <- computeCommunProb(cellchat, raw.use = T, population.size = FALSE)
+cellchat <- computeCommunProb(cellchat, raw.use = TRUE, population.size = FALSE)
 # Filter out the cell-cell communication if there are only few number of cells in certain cell groups
 cellchat <- filterCommunication(cellchat, min.cells = 10)
 
@@ -81,7 +81,7 @@ cellchat <- aggregateNet(cellchat)
 
 ### Compute and visualize the network centrality scores
 # Compute the network centrality scores
-plan(sequential)
+future::plan(sequential)
 cellchat <- netAnalysis_computeCentrality(cellchat, slot.name = "netP") # the slot 'netP' means the inferred intercellular communication network of signaling pathways
 
 

@@ -73,18 +73,19 @@ for (i in 1:length(pathways.show.all.lps)){
 }
 
 ## Comparative analysis
-object.list <- list(Saline = cellchat.saline, LPS = cellchat.lps)
+object.list <- list(Healthy = cellchat.saline, Inflammation = cellchat.lps)
 cellchat <- mergeCellChat(object.list, add.names = names(object.list))
 
 
 ### Part 1: Whether the cell-cell communication is enhanced or not
-gg1 <- compareInteractions(cellchat, show.legend = F, group = c(1,2)) +
-  scale_y_continuous(expand = c(0,0), limits = c(0, 1300)) +
-  theme(text = element_text(size = 16))
-gg2 <- compareInteractions(cellchat, show.legend = F, group = c(1,2), measure = "weight") +
-  scale_y_continuous(expand = c(0,0), limits = c(0, 100)) +
-  theme(text = element_text(size = 16))
+gg1 <- compareInteractions(cellchat, show.legend = F, group = c(1,2), color.use = c("#1F78B4","#FF7F00"), measure = "count", size.text = 14) +
+  scale_y_continuous(expand = c(0,0), limits = c(0, 1300))
+gg2 <- compareInteractions(cellchat, show.legend = F, group = c(1,2), color.use = c("#1F78B4","#FF7F00"), measure = "weight", size.text = 14) +
+  scale_y_continuous(expand = c(0,0), limits = c(0, 22))
 gg1 + gg2
+ggsave(
+  filename = "comp_anal.eps", plot = last_plot(), device = "eps", path = "../figures/Fig4/", width = 5, height = 3, dpi = 300
+)
 
 ### Part 2: The interaction between which cell types is significantly changed
 group.cellType <- factor(group.cellType, levels = c("Pituitary","Spleen"))
@@ -99,9 +100,9 @@ for (i in 1:length(object.list)) {
 }
 dev.off()
 
-netVisual_bubble(cellchat, sources.use = 2, targets.use = c(1,5,7,8,9,10,12),  comparison = c(1, 2), angle.x = 45)
-# ggsave(filename = "comp_cort_pituitary_bubble.eps", device = "eps", plot = last_plot(), width = 6, height = 5, dpi = 300, 
-#        path = file.path(out_dir,"comparison"))
+netVisual_bubble(cellchat, sources.use = 2, targets.use = c(1,5,7,8,9,10,12), color.text = c("#1F78B4","#FF7F00"), comparison = c(1, 2), angle.x = 45)
+ggsave(filename = "comp_cort_pituitary_bubble.eps", device = "eps", plot = last_plot(), width = 6, height = 5, dpi = 300,
+       path = "../outs/cellchat/")
 
 # gg1 <- netVisual_bubble(cellchat, sources.use = 2, targets.use = c(1,5,7,8,9,10,12),  comparison = c(1, 2), max.dataset = 2, title.name = "Increased signaling in LPS", angle.x = 45, remove.isolate = T)
 # #> Comparing communications on a merged object

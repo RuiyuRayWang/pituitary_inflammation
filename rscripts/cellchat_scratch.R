@@ -100,8 +100,9 @@ for (i in 1:length(object.list)) {
 }
 dev.off()
 
-netVisual_bubble(cellchat, sources.use = 2, targets.use = c(1,5,7,8,9,10,12), color.text = c("#1F78B4","#FF7F00"), comparison = c(1, 2), angle.x = 45)
-ggsave(filename = "comp_cort_pituitary_bubble.eps", device = "eps", plot = last_plot(), width = 6, height = 5, dpi = 300,
+netVisual_bubble(cellchat, sources.use = 2, targets.use = c(1,5,7,8,9,10,12), color.text = c("#1F78B4","#FF7F00"), comparison = c(1, 2), angle.x = 45,
+                 title.name = "Increased signaling in Inflammation", remove.isolate = T)
+ggsave(filename = "comp_cort_pituitary_bubble.eps", device = "eps", plot = last_plot(), width = 6, height = 5.4, dpi = 300,
        path = "../outs/cellchat/")
 
 # gg1 <- netVisual_bubble(cellchat, sources.use = 2, targets.use = c(1,5,7,8,9,10,12),  comparison = c(1, 2), max.dataset = 2, title.name = "Increased signaling in LPS", angle.x = 45, remove.isolate = T)

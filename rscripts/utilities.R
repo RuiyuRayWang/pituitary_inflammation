@@ -1,12 +1,44 @@
+#' Set a default value if an object is null
+#' 
+#' @param lhs An object to set if it's null
+#' @param rhs The value to provide if x is null
+#' 
+#' @return rhs if lhs is null, else lhs
+#' 
+#' @author Hadley Wickham
+#' @references https://adv-r.hadley.nz/functions.html#missing-arguments
+#' 
+`%||%` <- function(lhs, rhs) {
+  if(!is.null(x = lhs)) {
+    return(lhs)
+  } else {
+    return(rhs)
+  }
+}
+
+#' Set a default value if an object is NOT null
+#' 
+#' @param lhs An object to set if it's NOT null
+#' @param rhs The value to provide if x is NOT null
+#' 
+#' @return lhs if lhs is null, else rhs
+#' 
+#' @author Hadley Wickham
+#' @references https://adv-r.hadley.nz/functions.html#missing-arguments
+#' 
+`%iff%` <- function(lhs, rhs) {
+  if (!is.null(x = lhs)){
+    return(rhs)
+  } else {
+    return(lhs)
+  }
+}
+
 #' @title Calculate Percent Cells Expressing a Given Feature
 #' 
 #' @description 
 #' 
-#' 
-#' 
 #' @details 
-#' 
-#' Inspired by a script written by Ryan-Zhu (https://github.com/satijalab/seurat/issues/371#issuecomment-486384854)
 #' 
 #' @param object A Seurat object.
 #' @param features Features to calculate. By default, calculate all features.
@@ -16,6 +48,10 @@
 #' @examples 
 #' 
 #' @return A Seurat object with
+#' 
+#' @author Ryan-Zhu
+#' @references https://github.com/satijalab/seurat/issues/371#issuecomment-486384854
+#' 
 #' @import SeuratObject
 #' @export
 #' 
@@ -58,10 +94,21 @@ CalculateScalingFactor <- function(
   return(df)
 }
 
-#' @title  Calculate Marker Specificity
+#' @title
+#' Calculate Marker Specificity
+#' 
 #' @description 
 #' 
 #' @details 
+#' 
+#' @param object
+#' @param features
+#' @param group.by
+#' @param profile_use
+#' @param assays
+#'
+#' @return A Seurat object with marker specificity scores attached to feature metadata.
+#' @references Qiu, X. et al. Reversed graph embedding resolves complex single-cell trajectories. Nature Methods 14, 979-982 (2017).
 #' 
 #' @import dplyr
 #' @import cummeRbund
@@ -118,35 +165,8 @@ CalculateMarkerSpecificity <- function(
   colnames(marker_specificity) <- paste0("spec.", colnames(feature_profile))
   marker_specificity <- as.data.frame(marker_specificity)
   for (i in 1:ncol(marker_specificity)){
-    object[[assays]][[colnames(marker_specificity)[i]]] <- subset(x = marker_specificity, select = colnames(marker_specificity)[i])
+    object[[assays]][[colnames(marker_specificity)[i]]] <- dplyr::subset(x = marker_specificity, select = colnames(marker_specificity)[i])
   }
   
   return(object)
 }
-
-## DEPRECATED
-# # Credits to Ryan-Zhu (https://github.com/satijalab/seurat/issues/371)
-# # updated 1/31/2020 to accommodate V3.1
-# # updated 2/4/2020 to output "NA" for genes not detected in certain subgroups
-# PrctCellExprGene <- function(
-#   object, 
-#   genes, 
-#   group.by = "all") {
-#   if(group.by == "all"){
-#     prct = unlist(lapply(genes,calc_helper, object=object))
-#     result = data.frame(Markers = genes, Cell_proportion = prct)
-#     return(result)
-#   }
-#   
-#   else{
-#     list = SplitObject(object, group.by)
-#     factors = names(list)
-#     
-#     results = lapply(list, PrctCellExpringGene, genes=genes)
-#     for(i in 1:length(factors)){
-#       results[[i]]$Feature = factors[i]
-#     }
-#     combined = do.call("rbind", results)
-#     return(combined)
-#   }
-# }

@@ -2,8 +2,9 @@
 #' Seurat to Anndata (R part)
 #' 
 #' @description
-#' Convert a .h5Seurat Seurat object into anndata. Intermediate 
-#' results are dumped to temporary directory `/tmp`.
+#' Convert a .h5Seurat Seurat object into .h5ad AnnData. Dump intermediate 
+#' results to temporary directory `/tmp`, which will be used to 
+#' reconstruct the AnnData.
 #' 
 #' @details
 #' 
@@ -41,7 +42,7 @@ SeuratToAnndata <- function(
   
   # save metadata table
   seurat_obj[['cell_id']] <- colnames(seurat_obj)
-  write.csv(seurat_obj@meta.data, file=file.path(out_dir,paste0(f_name,'_metadata.csv')), quote=F, row.names=F)
+  write.csv(seurat_obj@meta.data, file=file.path(out_dir,'metadata.csv'), quote=F, row.names=F)
   
   # save embeddings
   lapply(X = embeddings, FUN = function(x){
@@ -56,7 +57,7 @@ SeuratToAnndata <- function(
   
   # write expression counts matrix
   counts_mtx <- GetAssayData(object = seurat_obj, assay = assay, slot = slot)
-  writeMM(obj = counts_mtx, file = file.path(out_dir, paste0(f_name,'_counts.mtx')))
+  writeMM(obj = counts_mtx, file = file.path(out_dir, 'counts.mtx'))
   
   # write dimensionality reduction matrix
   lapply(X = dim.red, FUN = function(x){
@@ -68,4 +69,10 @@ SeuratToAnndata <- function(
   })
   # dr <- do.call(what = cbind, args = dr)
   # write.csv(dr, file=file.path(out_dir,paste0(f_name,'_dr.csv')), quote=F, row.names=F)
+  
+  # write gene names
+  write.table(
+    data.frame('gene'=rownames(counts_mtx)),file=file.path(out_dir,'gene_names.csv'),
+    quote=F,row.names=F,col.names=F
+  )
 }

@@ -1,25 +1,37 @@
+#!/usr/bin/env python
+
+"""
+Convert Seurat .h5Seurat to Anndata .h5ad.
+"""
 import scanpy as sc
 import anndata
 from scipy import io
 from scipy.sparse import coo_matrix, csr_matrix
 import numpy as np
-import os
 import pandas as pd
+import shutil
+from pathlib import Path
+import re
 
-def load_tmp(f_name, in_dir, out_dir):
+def seurat_to_anndata(f_name, in_dir, out_dir):
+    # # coerce type
+    # in_dir = Path(in_dir)
+    # out_dir = Path(out_dir)
+
     # load sparse matrix:
-    X = io.mmread(os.path.join(in_dir, '.'.join([f_name+'_counts', 'mtx'])))
+    X = io.mmread(in_dir/'counts.mtx')
 
     # create anndata object
     adata = anndata.AnnData(
-        X=X.transpose().tocsr()
+        X=X.transpose().tocsr(),
+        dtype=X.dtype
     )
 
     # load cell metadata:
-    cell_meta = pd.read_csv(os.path.join(in_dir, '.'.join([f_name+'_metadata', 'csv'])))
+    cell_meta = pd.read_csv(in_dir/'metadata.csv')
 
     # load gene names:
-    with open(os.path.join(in_dir, '.'.join([f_name+'_gene_names', 'csv'])), 'r') as f:
+    with open(in_dir/'gene_names.csv', 'r') as f:
         gene_names = f.read().splitlines()
 
     # set anndata observations and index obs by barcodes, var by gene names
@@ -27,19 +39,40 @@ def load_tmp(f_name, in_dir, out_dir):
     adata.obs.index = adata.obs['cell_id'].to_list()
     adata.var.index = gene_names
 
-    # load dimensional reduction, set pca:1
-    for pca in ["pca"]:
-        pc_coord = pd.read_csv(os.path.join(in_dir, '.'.join([f_name + '_' + pca, 'csv'])))
-        pc_coord.index = adata.obs.index
-        adata.obsm['_'.join(["X",pca])] = pc_coord.to_numpy()
+    # load dimensional reduction, set pca
+    drs = in_dir.glob("dr_*")
+    for dr in drs:
+        dr_name = re.search('dr_(.+)', dr.stem).group(1)
+        dr_coord = pd.read_csv(dr)
+        dr_coord.index = adata.obs.index
+        adata.obsm['_'.join(["X",dr_name])] = dr_coord.to_numpy()
 
     # set umap
-    adata.obsm['X_umap'] = np.vstack((adata.obs['UMAP_1'].to_numpy(), adata.obs['UMAP_2'].to_numpy())).T
-    adata.obsm['X_umapint'] = np.vstack((adata.obs['UMAPint_1'].to_numpy(), adata.obs['UMAPint_2'].to_numpy())).T
-
-    # # plot a UMAP colored by sampleID to test:
-    # sc.pl.umap(adata, color=['stim'], frameon=False, save=False)
-    # sc.pl.scatter(adata, basis='umapint', color = ['cell_type_brief'], frameon=False, save=False)
+    embs = in_dir.glob("embeddings_*")
+    for emb in embs:
+        emb_name = re.search('embeddings_(.+)', emb.stem).group(1)
+        emb_coord = pd.read_csv(emb)
+        emb_coord.index = adata.obs.index
+        adata.obsm['_'.join(["X",emb_name])] = emb_coord
 
     # save dataset as anndata format
-    adata.write(os.path.join(out_dir,'.'.join([f_name,'h5ad'])))
+    adata.write(out_dir/'.'.join([f_name,'h5ad']))
+
+    # purge tmp files
+    shutil.rmtree(in_dir)
+
+if __name__ == "__main__":
+    """
+    Parse CML arguments
+    """
+    import sys
+    if len(sys.argv) < 3:
+        print("Insufficient argument passed. f_name=filename, in_dir=tmp dir, out_dir=output dir")
+    else:
+        try:
+            f_name = str(sys.argv[1])
+            in_dir = Path(sys.argv[2])
+            out_dir = Path(sys.argv[3])
+            seurat_to_anndata(f_name, in_dir, out_dir)
+        except:
+            print("Error: wrong argument type.")

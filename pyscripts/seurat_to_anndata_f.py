@@ -7,7 +7,7 @@ USAGE:
 python seurat_to_anndata_f.py f_name in_dir out_dir
 
 EXAMPLE:
-python seurat_to_anndata_f.py refdata_clean data/processed/tmp data/processed/
+python pyscripts/seurat_to_anndata_f.py refdata_clean data/processed/tmp data/processed/
 """
 import scanpy as sc
 import anndata

@@ -1,6 +1,6 @@
 library(CellChat)
 library(patchwork)
-source("setIdent.R")
+# source("setIdent.R")
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
@@ -31,7 +31,37 @@ netVisual_circle(cellchat.lps@net$count, vertex.weight = groupSize, weight.scale
 netVisual_circle(cellchat.lps@net$weight, vertex.weight = groupSize, weight.scale = T, label.edge= F, title.name = "Interaction weights/strength")
 
 # Automatically save the plots of the all inferred network for quick exploration
-dir.create("../outs/cellchat/Saline", recursive = T)
+## Circle Plot
+dir.create("../outs/cellchat/circle/Saline", recursive = T)
+pathways.show.all.saline <- cellchat.saline@netP$pathways
+for (i in 1:length(pathways.show.all.saline)){
+  try(
+    {
+      # Circle Plot
+      svglite::svglite(filename = file.path("../outs/cellchat/circle/Saline", paste(pathways.show.all.saline[i],"circle","aggregate.svg", sep = "_")), 
+                       width = 6, height = 6)
+      netVisual_aggregate(cellchat.saline, signaling = pathways.show.all.saline[i], layout = "circle")
+      dev.off()
+    }
+  )
+}
+
+dir.create("../outs/cellchat/circle/LPS", recursive = T)
+pathways.show.all.lps <- cellchat.lps@netP$pathways
+for (i in 1:length(pathways.show.all.lps)){
+  try(
+    {
+      # Circle Plot
+      svglite::svglite(filename = file.path("../outs/cellchat/circle/LPS", paste(pathways.show.all.lps[i],"circle","aggregate.svg", sep = "_")), 
+                       width = 6, height = 6)
+      netVisual_aggregate(cellchat.lps, signaling = pathways.show.all.lps[i], layout = "circle")
+      dev.off()
+    }
+  )
+}
+
+## Chord Diagram
+dir.create("../outs/cellchat/chord/Saline", recursive = T)
 pathways.show.all.saline <- cellchat.saline@netP$pathways
 for (i in 1:length(pathways.show.all.saline)){
   try(
@@ -40,7 +70,7 @@ for (i in 1:length(pathways.show.all.saline)){
           any(match(df.net.saline %>% filter(pathway_name == pathways.show.all.saline[i]) %>% pull(target),levels(cellchat.saline@idents)) %in% spleen.group.idx))
       {
         # Chord diagram
-        svglite::svglite(filename = file.path("../outs/cellchat/Saline", paste(pathways.show.all.saline[i],"chort","aggregate.svg", sep = "_")), 
+        svglite::svglite(filename = file.path("../outs/cellchat/chord/Saline", paste(pathways.show.all.saline[i],"chord","aggregate.svg", sep = "_")), 
                          width = 6, height = 6)
         netVisual_chord_cell(cellchat.saline, signaling = pathways.show.all.saline[i], group = group.cellType,
                              sources.use = pit.group.idx, targets.use = spleen.group.idx, scale = TRUE)
@@ -52,7 +82,7 @@ for (i in 1:length(pathways.show.all.saline)){
   )
 }
 
-dir.create("../outs/cellchat/LPS", recursive = T)
+dir.create("../outs/cellchat/chord/LPS", recursive = T)
 pathways.show.all.lps <- cellchat.lps@netP$pathways
 for (i in 1:length(pathways.show.all.lps)){
   try(
@@ -61,7 +91,7 @@ for (i in 1:length(pathways.show.all.lps)){
           any(match(df.net.lps %>% filter(pathway_name == pathways.show.all.lps[i]) %>% pull(target),levels(cellchat.lps@idents)) %in% spleen.group.idx))
       {
         # Chord diagram
-        svglite::svglite(filename = file.path("../outs/cellchat/LPS", paste(pathways.show.all.lps[i],"chort","aggregate.svg", sep = "_")), 
+        svglite::svglite(filename = file.path("../outs/cellchat/chord/LPS", paste(pathways.show.all.lps[i],"chord","aggregate.svg", sep = "_")), 
                          width = 6, height = 6)
         netVisual_chord_cell(cellchat.lps, signaling = pathways.show.all.lps[i], group = group.cellType, 
                              sources.use = pit.group.idx, targets.use = spleen.group.idx, scale = TRUE)
@@ -106,14 +136,6 @@ netVisual_bubble(cellchat, sources.use = 2, targets.use = c(1,5,7,8,9,10,12), co
 ggsave(filename = "comp_cort_pituitary_bubble.eps", device = "eps", plot = last_plot(), width = 6, height = 5.4, dpi = 300,
        path = "../outs/cellchat/")
 
-
-# Visualize CXCL and CCL pathways using Circle plot
-# cellchat.saline <- setIdent(
-#   object = cellchat.saline, 
-#   ident.use = "labels", 
-#   levels = c("B cells", "T cells", "Monocytes", "Macrophages", "NK cells", "Neutrophils", "pDCs", "Somatotropes", "Lactotropes", "Corticotropes", "Melanotropes",
-#              "Gonadotropes", "Thyrotropes")
-#   )
 
 ## Healthy
 netVisual_aggregate(cellchat.saline, signaling = "CXCL", layout = "circle")

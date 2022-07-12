@@ -4,6 +4,7 @@ misc/RESOURCES
 manuscripts/*
 outs
 figures
+miscs/RESOURCES
 deprecated/*
 notebooks/cache/*
 notebooks/figures/*

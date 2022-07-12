@@ -271,4 +271,3 @@ cells.integrated$cell_type_refined <- as.character(cells.integrated$cell_type_re
 cells.integrated$cell_type_brief <- as.character(cells.integrated$cell_type_brief)
 
 SaveH5Seurat(object = cells.integrated, filename = "../data/processed/cells_postprocessed.h5Seurat", overwrite = T)
-Convert("../data/processed/cells_postprocessed.h5Seurat", dest = "h5ad", overwrite = T)

@@ -25,6 +25,12 @@ suppressPackageStartupMessages({
 })
 ```
 
+```{r}
+WRITE_CACHE = FALSE
+READ_CACHE = !WRITE_CACHE
+```
+
+
 ## Load data
 
 ```{r}
@@ -100,16 +106,20 @@ cells.new[["ident"]] <- NULL
 ## Save data objects
 
 ```{r}
-saveRDS(cells.filtered, file = "../data/processed/cells.filtered.sce.rds")  ## SCE object for cellassign
-```
-
-```{r}
-SeuratDisk::SaveH5Seurat(object = cells.new, filename = "../data/processed/cells_pre.h5Seurat", overwrite = T)  ## Seurat object
+if(WRITE_CACHE){
+  saveRDS(cells.sce, file = "../data/processed/cells.sce.rds")  ## Raw SCE object for QC stat plots
+  saveRDS(cells.filtered, file = "../data/processed/cells.filtered.sce.rds")  ## SCE object for cellassign
+  SeuratDisk::SaveH5Seurat(object = cells.new, filename = "../data/processed/cells_pre.h5Seurat", overwrite = T)  ## Seurat object
+}
 ```
 
 ## Reproducing Plots
 
-### Supplementary Figure x
+```{r}
+if(READ_CACHE){ cells.sce = readRDS("../data/processed/cells.sce.rds") }
+```
+
+### Supplementary Figure 1a
 
 ```{r}
 as.data.frame(colData(cells.sce)[,c("nCount_RNA","nFeature_RNA","discard")]) %>%
@@ -118,7 +128,7 @@ as.data.frame(colData(cells.sce)[,c("nCount_RNA","nFeature_RNA","discard")]) %>%
   scale_color_manual(values = c("#1F78B4","#E31A1C"), labels = c("Kept","Removed"), name = "") +
   scale_x_continuous(expand = c(0.15,0.1)) +
   xlab("UMI counts") +
-  ylab("Gene counts") +
+  ylab("Number of Genes Recovered") +
   theme_classic() +
   theme(
     axis.text = element_text(size = 16),
@@ -132,7 +142,7 @@ as.data.frame(colData(cells.sce)[,c("nCount_RNA","nFeature_RNA","discard")]) %>%
     )
 ```
 
-### Supplementary Figure x
+### Supplementary Figure 1b
 
 ```{r}
 as.data.frame(colData(cells.sce)[,c("subsets_Mito_percent","stim","high_subsets_Mito_percent")]) |>
@@ -141,12 +151,15 @@ as.data.frame(colData(cells.sce)[,c("subsets_Mito_percent","stim","high_subsets_
   geom_jitter(mapping = aes(color = high_subsets_Mito_percent), size = 0.3, height = 0, width = .1) +
   scale_color_manual(values = c("#1F78B4","#E31A1C")) +
   theme_linedraw() +
+  xlab("Experimental Condition") +
+  ylab("Percent Mitochondrial (%)") +
   theme(
+    legend.position = "none",
     axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)
   )
 ```
 
-### Supplementary Figure x
+### Supplementary Figure 1c
 
 ```{r}
 as.data.frame(colData(cells.sce)[,c("subsets_Ribo_percent","stim","high_subsets_Ribo_percent")]) |>
@@ -154,17 +167,17 @@ as.data.frame(colData(cells.sce)[,c("subsets_Ribo_percent","stim","high_subsets_
   geom_violin() +
   geom_jitter(mapping = aes(color = high_subsets_Ribo_percent), size = 0.3, height = 0, width = .1) +
   scale_color_manual(values = c("#1F78B4","#E31A1C")) +
+  xlab("Experimental Condition") +
+  ylab("Percent Ribosomal (%)") +
   theme_linedraw() +
   theme(
+    legend.position = "none",
     axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)
   )
 ```
-
-
 
 ### Session info
 
 ```{r}
 sessionInfo()
 ```
-

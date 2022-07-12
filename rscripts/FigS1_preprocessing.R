@@ -75,8 +75,8 @@ as.data.frame(colData(cells.sce)[,c("subsets_Ribo_percent","stim","high_subsets_
 ggsave(filename="ribo_violin.eps", plot=last_plot(), device="eps", path="../figures/FigS1/", width=6, height=5, dpi=300, family="Arial")
 
 
-cells_postprocessed <- SeuratDisk::LoadH5Seurat("../data/processed/cells_postprocessed.h5Seurat", verbose=F)
 # FigS1d
+cells_postprocessed <- SeuratDisk::LoadH5Seurat("../data/processed/cells_postprocessed.h5Seurat", verbose=F)
 cells_postprocessed |> 
   FetchData(vars = c("cell_type_refined","treat")) |>
   dplyr::mutate(cell_type_refined = factor(cell_type_refined,
@@ -105,3 +105,31 @@ cells_postprocessed |>
     axis.text.y = element_text(size = 16)
   )
 ggsave(filename="cell_proportion.eps", plot=last_plot(), device="eps", path="../figures/FigS1/", width=6, height=5, dpi=300, family="Arial")
+
+# FigS1e
+library(ggrepel)
+tab <- read.csv("../outs/saturation_maxc_3000_s_10_r_50.csv")
+tab$Group <- factor(tab$Group, levels = c("Som", "Lac", "Cort", "Mel", "Gonad", "Thyro", "Pou1f1", "Stem",
+                                          "WBCs", "RBCs", "Endo","Peri", "Pitui", "Ambig"))
+pdf(
+  file = "../figures/FigS1/FigS1e.pdf",
+  width = 4, height = 3
+)
+tab |>
+  group_by(Cells, Group) |>
+  summarise(mu = mean(Gene)) |>
+  group_by(Group) |>
+  mutate(label = if_else(Cells == max(Cells), as.character(Group), NA_character_)) |>
+  ggplot(aes(x = Cells, y = mu)) +
+  geom_line(aes(color = Group)) +
+  geom_label_repel(aes(label = label), nudge_x = 5, na.rm = TRUE, force = 10, max.overlaps = 30) +
+  scale_color_discrete(name = "Cell type") +
+  scale_x_continuous(breaks = seq(0,3000,300), name = "Number of Cells Considered") +
+  scale_y_continuous(name = "Cumulative Number of\nGenes Recovered") +
+  theme_linedraw() +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)
+  )
+dev.off()
+

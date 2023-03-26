@@ -2,7 +2,9 @@ library(Seurat)
 library(SeuratDisk)
 library(ggpubr)
 library(tidyverse)
+library(DOSE)
 library(clusterProfiler)
+library(ggtext)
 library(org.Mm.eg.db)
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -115,21 +117,21 @@ de_ego.BP <- readRDS("../data/processed/GO_BP.rds")
 de_ego.CC <- readRDS("../data/processed/GO_CC.rds")
 de_ego.MF <- readRDS("../data/processed/GO_MF.rds")
 ### BP
-GO_BP_terms_use <- c("GO:0035456","GO:0034341","GO:0019221","GO:0031349","GO:0002237","GO:0071222","GO:0045088","GO:0050727")
-de_ego.BP.filtered <- de_ego.BP %>% dplyr::filter(p.adjust < 0.05) %>% dplyr::filter(ID %in% GO_BP_terms_use)
+GO_BP_terms_use <- c("GO:0035456","GO:0034341","GO:0019221","GO:0031349","GO:0002237","GO:0071222","GO:0045088")  # ,"GO:0050727"
+de_ego.BP.filtered <- de_ego.BP |> dplyr::filter(p.adjust < 0.05) |> dplyr::filter(ID %in% GO_BP_terms_use)
 
 p1 <- clusterProfiler::dotplot(de_ego.BP.filtered, showCategory = nrow(de_ego.BP.filtered)) +
   scale_x_continuous(
-    breaks = c(0.05,0.06,0.07,0.08,0.09)
-      ) +
+    breaks = c(0.05,0.065,0.08)
+  ) +
   scale_y_discrete(
     labels=function(x) str_wrap(x, width=20)
-    ) +
-  # scale_size(breaks = c(25,35)) +
+  ) +
+  scale_size(breaks = c(25,45)) +
   scale_color_continuous(
     low = "red",
     high = "blue",
-    breaks = c(8e-9, 2e-9),
+    breaks = c(2.5e-10, 2e-12),
     guide = guide_colorbar(reverse=TRUE, nbin = 500)
   ) +
   guides(
@@ -137,44 +139,43 @@ p1 <- clusterProfiler::dotplot(de_ego.BP.filtered, showCategory = nrow(de_ego.BP
     size = guide_legend(order = 2)
   ) +
   theme(
-    legend.title = element_text(size = 18, hjust = .1),
-    legend.text = element_text(size = 16, hjust = .1),
-    axis.text.x = element_text(size = 16),
-    axis.title.x = element_text(size = 20), 
-    axis.text.y = element_text(size = 18, lineheight = .8)
+    legend.text = element_text(size = 12, hjust = .1),
+    axis.text.x = element_text(size = 12),
+    axis.title.x = element_text(size = 15),
+    axis.text.y = element_text(size = 15, lineheight = .8),
+    legend.position = c(.1,-.18),
+    legend.direction = "horizontal",
+    legend.box = "horizontal",
+    plot.margin = unit(c(.2,.2,1.5,.5),"cm")
   )
 
 ggsave(
   filename = "GO_BP_dotplot.eps",
   plot = p1,
   device = "eps",
-  path = '../figures/Fig3/',
-  width = 160, height = 150,
+  path = '../figures/Fig2/',
+  width = 4.5, height = 5.4,
   dpi = 300,
-  units = "mm",
   family = "Arial"
 )
 
 ### CC
-GO_CC_terms_use <- c("GO:0033646","GO:0043657","GO:0005615","GO:0043230","GO:0005576","GO:0030670","GO:0031410","GO:0042612","GO:0009897")  ## "GO:0030139","GO:0005789","GO:0048471"
+GO_CC_terms_use <- c("GO:0033646","GO:0005615","GO:0043230","GO:0005576","GO:0030670","GO:0031410","GO:0009897")  ## "GO:0030139","GO:0005789","GO:0048471","GO:0042612","GO:0043657",
 de_ego.CC.filtered <- de_ego.CC %>% dplyr::filter(p.adjust < 0.05) %>% dplyr::filter(ID %in% GO_CC_terms_use)
-# df_tmp <- de_ego.CC.filtered@result
-# 
-# df_tmp <- dplyr::arrange(df_tmp, DOSE::parse_ratio(GeneRatio))
-# y_col <- ifelse(df_tmp$ID %in% c("GO:0005615","GO:0005576","GO:0099503"), "red", "black")
 
 p2 <- clusterProfiler::dotplot(de_ego.CC.filtered, showCategory = nrow(de_ego.CC.filtered)) +
   scale_x_continuous(
-    breaks = c(0.00,0.05,0.10,0.15,0.20)
+    breaks = c(0.05,0.10,0.15)
   ) +
   scale_y_discrete(
     labels=function(x) str_wrap(x, width=20)
-    ) +
-  # scale_size(breaks = c(30,60)) +
+  ) +
+  scale_size(breaks = c(10,30,50)) +
   scale_color_continuous(
     low = "red",
     high = "blue",
-    breaks = c(0.0075, 0.0025),
+    breaks = c(7.5e-3, 2.5e-3),
+    labels = function(x) format(c(7.5e-3,2.5e-3), scientific = TRUE),
     guide = guide_colorbar(reverse=TRUE, nbin = 500)
   ) +
   guides(
@@ -182,21 +183,23 @@ p2 <- clusterProfiler::dotplot(de_ego.CC.filtered, showCategory = nrow(de_ego.CC
     size = guide_legend(order = 2)
   ) +
   theme(
-    legend.title = element_text(size = 18, hjust = .1),
-    legend.text = element_text(size = 16, hjust = .1),
-    axis.text.x = element_text(size = 16),
-    axis.title.x = element_text(size = 20), 
-    axis.text.y = element_text(size = 18, lineheight = .8)
+    legend.text = element_text(size = 12, hjust = .1),
+    axis.text.x = element_text(size = 12),
+    axis.title.x = element_text(size = 15),
+    axis.text.y = element_text(size = 15, lineheight = .8),
+    legend.position = c(.1,-.18),
+    legend.direction = "horizontal",
+    legend.box = "horizontal",
+    plot.margin = unit(c(.2,.2,1.5,.5),"cm")
   )
 
 ggsave(
   filename = "GO_CC_dotplot.eps",
   plot = p2,
   device = "eps",
-  path = '../figures/Fig3/',
-  width = 160, height = 150,
+  path = '../figures/Fig2/',
+  width = 4.5, height = 5.4,
   dpi = 300,
-  units = "mm",
   family = "Arial"
 )
 

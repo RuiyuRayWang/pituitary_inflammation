@@ -1,9 +1,13 @@
 library(ggplot2)
 library(ggpubr)
+library(ggtext)
 library(tidyverse)
 library(RColorBrewer)
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+suppressMessages(
+  extrafont::loadfonts(device="postscript")
+)
 
 qpcr <- read.csv("../data/qpcr/qpcr_before_ratio_raw.csv", row.names = 1)
 
@@ -36,30 +40,31 @@ genes_of_interest <- unique(df$gene)
 cols = c(brewer.pal(9, name = "Pastel1"), brewer.pal(4, name = "Pastel2"))
 
 ### Cartpt
+# g = "Cartpt"
+# df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value) %>%
+#   ggboxplot(
+#     x = "tissue", y = "value", fill = "treat",
+#     ylab = g,
+#     width = 0.7,
+#     orientation = "horizontal",
+#     palette = cols_two[c(2,5)],
+#   ) +
+#   scale_y_continuous(expand = c(0.03,0)) +
+#   theme_replace() +
+#   theme(
+#     axis.line = element_blank(),
+#     axis.title.y = element_blank(),
+#     axis.text.y = element_text(size = 15),
+#     axis.title.x = element_markdown(size = 15, face = "italic"),
+#     axis.text.x = element_text(angle = 90, size = 12),
+#     # panel.grid.major.x = element_line(color = "#CCCCCC"),
+#     panel.grid.major.y = element_line(color = "#CCCCCC"),
+#     panel.border = element_rect(fill = NA, color = "black")
+#     )
+# ggsave(filename = paste0(g,"_rel_exp.eps"), device = "eps", path = '../figures/Fig3/qpcr/',
+#        width = 3, height = 10, dpi = 300, family = "Arial")
+
 g = "Cartpt"
-df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value) %>%
-  ggboxplot(
-    x = "tissue", y = "value", fill = "treat",
-    ylab = g,
-    width = 0.7,
-    orientation = "horizontal",
-    palette = cols_two[c(2,5)],
-  ) +
-  scale_y_continuous(expand = c(0.03,0)) +
-  theme_replace() +
-  theme(
-    axis.line = element_blank(),
-    axis.title.y = element_blank(),
-    axis.text.y = element_text(size = 15),
-    axis.title.x = element_text(size = 15),
-    axis.text.x = element_text(angle = 90, size = 12),
-    # panel.grid.major.x = element_line(color = "#CCCCCC"),
-    panel.grid.major.y = element_line(color = "#CCCCCC"),
-    panel.border = element_rect(fill = NA, color = "black")
-    )
-ggsave(filename = paste0(g,"_rel_exp.eps"), device = "eps", path = '../figures/Fig3/qpcr/',
-       width = 3, height = 10, dpi = 300, family = "Arial")
-  
 df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value) %>%
   ggboxplot(
     x = "tissue", y = "value", fill = "treat",
@@ -75,7 +80,7 @@ df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value) %>%
     axis.line = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_markdown(size = 20, face = "italic"),
     axis.text.x = element_text(size = 16),
     # axis.ticks.y = element_blank(),
     # panel.grid.major.x = element_line(color = "#CCCCCC"),
@@ -103,7 +108,7 @@ df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value/1000) %>%
     axis.line = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_markdown(size = 20, face = "italic"),
     axis.text.x = element_text(size = 16),
     axis.ticks.y = element_blank(),
     # panel.grid.major.x = element_line(color = "#CCCCCC"),
@@ -131,7 +136,7 @@ df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value) %>%
     axis.line = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_markdown(size = 20, face = "italic"),
     axis.text.x = element_text(size = 16),
     axis.ticks.y = element_blank(),
     # panel.grid.major.x = element_line(color = "#CCCCCC"),
@@ -159,7 +164,7 @@ df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value/10) %>%
     axis.line = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_markdown(size = 20, face = "italic"),
     axis.text.x = element_text(size = 16),
     axis.ticks.y = element_blank(),
     # panel.grid.major.x = element_line(color = "#CCCCCC"),
@@ -187,7 +192,7 @@ df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value/10) %>%
     axis.line = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_markdown(size = 20, face = "italic"),
     axis.text.x = element_text(size = 16),
     axis.ticks.y = element_blank(),
     # panel.grid.major.x = element_line(color = "#CCCCCC"),
@@ -215,7 +220,7 @@ df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value/10) %>%
     axis.line = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_markdown(size = 20, face = "italic"),
     axis.text.x = element_text(size = 16),
     axis.ticks.y = element_blank(),
     # panel.grid.major.x = element_line(color = "#CCCCCC"),
@@ -243,7 +248,7 @@ df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value/10) %>%
     axis.line = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_markdown(size = 20, face = "italic"),
     axis.text.x = element_text(size = 16),
     axis.ticks.y = element_blank(),
     # panel.grid.major.x = element_line(color = "#CCCCCC"),
@@ -271,7 +276,7 @@ df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value/10) %>%
     axis.line = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_markdown(size = 20, face = "italic"),
     axis.text.x = element_text(size = 16),
     axis.ticks.y = element_blank(),
     # panel.grid.major.x = element_line(color = "#CCCCCC"),
@@ -299,7 +304,7 @@ df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value) %>%
     axis.line = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_markdown(size = 20, face = "italic"),
     axis.text.x = element_text(size = 16),
     axis.ticks.y = element_blank(),
     # panel.grid.major.x = element_line(color = "#CCCCCC"),
@@ -327,7 +332,7 @@ df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value) %>%
     axis.line = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_markdown(size = 20, face = "italic"),
     axis.text.x = element_text(size = 16),
     axis.ticks.y = element_blank(),
     # panel.grid.major.x = element_line(color = "#CCCCCC"),
@@ -355,7 +360,7 @@ df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value) %>%
     axis.line = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_markdown(size = 20, face = "italic"),
     axis.text.x = element_text(size = 16),
     axis.ticks.y = element_blank(),
     # panel.grid.major.x = element_line(color = "#CCCCCC"),
@@ -383,7 +388,7 @@ df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value/1000) %>%
     axis.line = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_markdown(size = 20, face = "italic"),
     axis.text.x = element_text(size = 16),
     axis.ticks.y = element_blank(),
     # panel.grid.major.x = element_line(color = "#CCCCCC"),
@@ -411,7 +416,7 @@ df %>% dplyr::filter(gene == g) %>% dplyr::mutate(value = value) %>%
     axis.line = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_markdown(size = 20, face = "italic"),
     axis.text.x = element_text(size = 16),
     axis.ticks.y = element_blank(),
     # panel.grid.major.x = element_line(color = "#CCCCCC"),

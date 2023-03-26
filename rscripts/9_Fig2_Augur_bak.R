@@ -1,68 +1,28 @@
-setwd(dirname(rstudioapi::getSourceEditorContext()$path))
-library(Augur)
 library(Seurat)
-library(tidyverse)
-library(viridis)
-source("plot_umap_refactored.R")
-
-suppressMessages({
-  # extrafont::font_import()
-  extrafont::loadfonts(device="postscript")
-})
-
-hpcs.augur <- readRDS(file = "../data/processed/hpcs.augur.rds")
-
-# ======================================================================================================
-# Augur AUC on UMAP
 library(SeuratDisk)
-hpcs.lps <- LoadH5Seurat("../data/processed/hpcs_lps_state_marked.h5Seurat")
-hpcs.lps$cell_type = hpcs.lps$cell_type_brief
-hpcs.lps$barcode <- NULL
+library(tidyverse)
+library(ggrepel)
+library(Augur)
 
-u <- plot_umap_refactored(
-  augur = hpcs.augur, sc = hpcs.lps, palette = "OrRd", reduction = "umap", cell_type_col = "cell_type", 
-  size_sm = 14, size_lg = 16, lgd.pos = c(.12,.05), lgd.name = "Augur\nAUC", direction = 1
-)
-ggsave(filename = "hpcs_augurscore_umap.eps", plot = u, device = "eps", path = "../figures/Fig2/", width = 4, height = 4, dpi = 300, family = "Arial")
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
-# ======================================================================================================
-# Lollipop plot
-aucs = hpcs.augur$AUC
-size_sm = 12
-size_lg = 14
-range = range(aucs$auc)
-expand = abs(diff(range)) * 0.25
-p = aucs |> ggplot(aes(x = reorder(cell_type, auc), y = auc)) + 
-  geom_hline(aes(yintercept = 0.5), linetype = "dotted", size = 0.5) + 
-  geom_point(aes(color = cell_type), size = 2) + 
-  geom_text(aes(label = format(auc, digits = 2), y = ifelse(auc < 0.5, 0.5, auc)), size = 5, nudge_y = expand, hjust = 0.5, color = "black") + 
-  geom_segment(aes(color = cell_type, xend = cell_type, yend = 0.5)) + scale_y_continuous("Augur AUC", limits = c(min(range[1] - expand, 0.5), range[2] + expand * 1.5)) + 
-  scale_color_manual(values = scales::hue_pal()(13)[c(9,10,2,6,1,11)]) +
-  coord_flip() + 
-  theme_bw() + 
-  theme(axis.title.x = element_text(size = size_lg), axis.text.x = element_text(size = size_sm, color = "black"), 
-        axis.title.y = element_blank(), axis.text.y = element_text(size = size_lg-0.6, color = "black"),
-        panel.grid = element_blank(), 
-        strip.text = element_text(size = size_lg), strip.background = element_blank(), 
-        axis.line.y = element_blank(), axis.line.x = element_blank(), 
-        legend.position = "none", legend.text = element_text(size = size_sm), 
-        legend.title = element_blank(), legend.key.size = unit(0.6, "lines"), 
-        legend.margin = margin(rep(0, 4)), legend.background = element_blank(), 
-        plot.title = element_text(size = size_lg, hjust = 0.5))
-ggsave(
-  filename = "augur_lolipop.eps",
-  device = "eps", 
-  plot = last_plot(), 
-  path = "../figures/Fig2/", 
-  dpi = 300, width = 3, height = 3.6,
-  family = "Arial"
+suppressMessages(
+  extrafont::loadfonts(device="postscript")
 )
 
-# ======================================================================================================
+hpcs.lps <- LoadH5Seurat(file = "../data/processed/hpcs_lps_state_marked.h5Seurat", verbose = F)
 
 test_method = "MAST"
 de.state.mks <- read.csv(file = paste0("../outs/de_state_markers_",test_method,".csv"))
+# de.state.mks.uniq <- de.state.mks[!duplicated(de.state.mks$gene),]
 
+hpcs.augur <- calculate_auc(hpcs.lps, cell_type_col = "cell_type_brief", label_col = "state", n_threads = 32)
+
+saveRDS(hpcs.augur, file = "../data/processed/hpcs.augur.rds")
+
+# https://gist.github.com/ramhiser/93fe37be439c480dc26c4bed8aab03dd
+# https://www.r-graph-gallery.com/267-reorder-a-variable-in-ggplot2.html
+hpcs.augur <- readRDS("../data/processed/hpcs.augur.rds")
 augur.df <- hpcs.augur$AUC
 df.tmp <- data.frame(cell_type = c("Som","Lac","Cort","Mel","Gonad","Thyro"), 
                      n_degs = c(sum(de.state.mks$cell_type == "Som"),
@@ -86,6 +46,40 @@ augur.df <- dplyr::right_join(augur.df, col_pal.df, by = "cell_type")
 augur.df <- dplyr::mutate(augur.df, cell_type = fct_reorder(cell_type, dplyr::desc(auc)))
 
 augur.df$cell_type <- factor(augur.df$cell_type, levels = rev(c("Cort","Som","Mel","Lac","Gonad","Thyro")))
+ggplot(augur.df, mapping = aes(x = cell_type, y = auc)) +
+  coord_flip() +
+  geom_point(aes(fill=cell_type), size=6, shape=21, stroke=0) +
+  geom_segment(aes(x=cell_type, xend=cell_type, y=0, yend=auc, color = cell_type), size = 2) +
+  scale_fill_manual(values = augur.df$col_pal,
+                    breaks = augur.df$cell_type) +
+  scale_color_manual(values = augur.df$col_pal,
+                     breaks = augur.df$cell_type) +
+  geom_text(mapping = aes(label = round(auc, digits = 2)), 
+            vjust = -.75,
+            # hjust = -0.25,
+            size = 6) +
+  # ylim(c(-0.02, 1.2)) +
+  scale_y_continuous(limits = c(0.0, 1.05),expand = c(0, 0)) +  # Force Y-axis start from 0
+  xlab(label = "Cell type") +
+  ylab(label = "Augur AUC") +
+  theme_bw() +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.border = element_rect(size = 2, fill = NA),
+    # axis.ticks.x = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 16),
+    axis.text.y = element_text(size = 18),
+    axis.title = element_text(size = 20),
+    legend.position = "none"
+  )
+ggsave(
+  filename = "augur_lolipop.eps",
+  device = "eps", 
+  plot = last_plot(), 
+  path = "../figures/Fig2/", 
+  dpi = 300, width = 4, height = 5,
+  family = "Arial"
+)
 
 pearson.res <- cor.test(augur.df$n_degs, augur.df$auc, method = "pearson", conf.level = 0.95)
 ggplot(augur.df, aes(x = n_degs, y = auc)) +
@@ -114,14 +108,13 @@ ggplot(augur.df, aes(x = n_degs, y = auc)) +
            label = paste0("R = ",round(pearson.res$estimate, digits = 3),", p = ", sprintf("%.5f",pearson.res$p.value)), 
            color = "blue") +
   theme(
-    panel.border = element_rect(size = .6, fill = NA),
+    panel.border = element_rect(size = 1.6, fill = NA),
     panel.background = element_blank(),
     panel.grid = element_line(color = "#CCCCCC", size = .6),
     axis.text = element_text(size = 16),
     axis.title = element_text(size = 18),
     legend.position = "none"
   )
-
 ggsave(
   filename = "augur_auc_de_scatter.eps",
   device = "eps", 
@@ -130,3 +123,4 @@ ggsave(
   dpi = 300, width = 4.5, height = 4.5,
   family = "Arial"
 )
+

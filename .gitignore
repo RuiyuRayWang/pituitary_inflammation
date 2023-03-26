@@ -9,6 +9,7 @@ deprecated/*
 notebooks/cache/*
 notebooks/figures/*
 **/*.ipynb_checkpoints/
+rscripts/16_评审问题.R
 
 # History files
 .Rhistory

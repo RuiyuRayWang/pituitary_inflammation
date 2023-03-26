@@ -1,5 +1,6 @@
 library(clusterProfiler)
 library(org.Mm.eg.db)
+library(DOSE)
 library(EnhancedVolcano)
 
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -100,7 +101,7 @@ ggsave(
   family = "Arial"
   )
 
-ms.GO_CC.df <- ms_ego.CC@result %>% slice_head(n = 5)
+ms.GO_CC.df <- ms_ego.CC@result %>% slice_head(n = 8)
 # barplot(ms_ego.CC, showCategory = 5, color = "pvalue", order = T) + 
 #   scale_fill_gradient(low = "#CCCC00", high = "#FF6600", trans = "reverse") +
 #   scale_x_continuous(
@@ -115,7 +116,8 @@ ms.GO_CC.df <- ms_ego.CC@result %>% slice_head(n = 5)
 ms.GO_CC.df <- ms.GO_CC.df %>%
   dplyr::arrange(desc(Count), Description) %>%
   dplyr::mutate(Description = factor(Description, levels = rev(Description))) %>%
-  dplyr::mutate(Count = as.integer(Count))
+  dplyr::mutate(Count = as.integer(Count)) |>
+  dplyr::mutate(GeneRatio = parse_ratio(GeneRatio))
   
 ggplot(ms.GO_CC.df, aes(x = Description, y = -log10(p.adjust), fill = Count)) +
   coord_flip() +
@@ -123,12 +125,12 @@ ggplot(ms.GO_CC.df, aes(x = Description, y = -log10(p.adjust), fill = Count)) +
   geom_bar(stat = "identity", color = "#333333", width = 0.67) +
   scale_y_continuous(
     expand = c(0,0),
-    limits = c(0,1.5)
+    limits = c(0,2)
   ) +
   scale_fill_continuous(
     low = "brown", 
     high = "orange",
-    limits = c(0,12),
+    limits = c(0,15),
     breaks = c(0,4,8,12)
     ) +
   theme_bw() +
@@ -141,6 +143,28 @@ ggplot(ms.GO_CC.df, aes(x = Description, y = -log10(p.adjust), fill = Count)) +
 
 ggsave(
   filename = "GO_CC_barplot_proteomics.eps", 
+  device = "eps", 
+  path = "../figures/Fig3/", 
+  width = 120, height = 90, 
+  dpi = 300, 
+  units = "mm", 
+  family = "Arial"
+)
+
+ms.GO_CC.df %>% 
+  ggplot(mapping = aes(x = GeneRatio, y = Description)) +
+  geom_point(mapping = aes(size = Count, color = -log10(p.adjust))) +
+  scale_color_continuous(low = "brown", high = "orange", name = "-log<sub>10</sub>(p.adj)") +
+  scale_size(limits = c(0,15), breaks = c(4,8,12)) +
+  scale_y_discrete(name = "", labels = function(x) str_wrap(x, width = 28)) +
+  theme_bw() +
+  theme(
+    axis.title = element_text(size = 15),
+    axis.text = element_text(size = 12),
+    legend.title = element_markdown()
+  )
+ggsave(
+  filename = "GO_CC_dotplot_proteomics.eps", 
   device = "eps", 
   path = "../figures/Fig3/", 
   width = 120, height = 90, 

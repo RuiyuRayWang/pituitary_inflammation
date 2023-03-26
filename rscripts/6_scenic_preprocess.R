@@ -85,6 +85,7 @@ som.lps <- RunUMAP(som.lps, features = rownames(som.lps), reduction = "pca.sceni
 # DimPlot(som.lps, reduction = "umap.scenic", group.by = paste0("AUC_snn_res.",res)) | DimPlot(som.lps, reduction = "umap.scenic", group.by = "state")
 som.lps <- RenameIdents(som.lps, `0` = "Inflammation", `1` = "Healthy")
 som.lps$scenic_state <- factor(Idents(som.lps), levels = c("Healthy","Inflammation"))
+aricode::ARI(som.lps@meta.data |> pull("state"), som.lps@meta.data |> pull("scenic_state"))
 for (s in levels(som.lps$scenic_state)){
   hpcs.lps <- SetIdent(object = hpcs.lps, cells = WhichCells(som.lps, expression = scenic_state == s), value = s)
 }
@@ -92,7 +93,7 @@ for (s in levels(som.lps$scenic_state)){
 ## Lac
 lac.lps <- subset(hpcs.lps, subset = cell_type_brief == "Lac")
 DefaultAssay(lac.lps) <- "AUC"
-lac.lps <- FindVariableFeatures(lac.lps, assay = "AUC", selection.method = "disp", nfeatures = 200)
+lac.lps <- FindVariableFeatures(lac.lps, assay = "AUC", selection.method = "disp", nfeatures = 500)
 # lac.lps@assays$AUC@scale.data <- GetAssayData(lac.lps, slot = "data")[VariableFeatures(lac.lps),]
 lac.lps <- ScaleData(lac.lps, do.scale = FALSE, do.center = TRUE)
 lac.lps <- RunPCA(lac.lps, reduction.name = "pca.scenic", reduction.key = "PCAscenic_")
@@ -103,6 +104,7 @@ lac.lps <- RunUMAP(lac.lps, features = rownames(lac.lps), reduction = "pca.sceni
 DimPlot(lac.lps, reduction = "umap.scenic", group.by = paste0("AUC_snn_res.",res)) | DimPlot(lac.lps, reduction = "umap.scenic", group.by = "state")
 lac.lps <- RenameIdents(lac.lps, `0` = "Healthy", `1` = "Inflammation")
 lac.lps$scenic_state <- factor(Idents(lac.lps), levels = c("Healthy","Inflammation"))
+aricode::ARI(lac.lps@meta.data |> pull("state"), lac.lps@meta.data |> pull("scenic_state"))
 for (s in levels(lac.lps$scenic_state)){
   hpcs.lps <- SetIdent(object = hpcs.lps, cells = WhichCells(lac.lps, expression = scenic_state == s), value = s)
 }
@@ -121,6 +123,7 @@ cort.lps <- RunUMAP(cort.lps, features = rownames(cort.lps), reduction = "pca.sc
 DimPlot(cort.lps, reduction = "umap.scenic", group.by = paste0("AUC_snn_res.",res)) | DimPlot(cort.lps, reduction = "umap.scenic", group.by = "state")
 cort.lps <- RenameIdents(cort.lps, `0` = "Healthy", `1` = "Inflammation")
 cort.lps$scenic_state <- factor(Idents(cort.lps), levels = c("Healthy","Inflammation"))
+aricode::ARI(cort.lps@meta.data |> pull("state"), cort.lps@meta.data |> pull("scenic_state"))
 for (s in levels(cort.lps$scenic_state)){
   hpcs.lps <- SetIdent(object = hpcs.lps, cells = WhichCells(cort.lps, expression = scenic_state == s), value = s)
 }
@@ -128,17 +131,18 @@ for (s in levels(cort.lps$scenic_state)){
 ## Mel
 mel.lps <- subset(hpcs.lps, subset = cell_type_brief == "Mel")
 DefaultAssay(mel.lps) <- "AUC"
-mel.lps <- FindVariableFeatures(mel.lps, assay = "AUC", selection.method = "disp", nfeatures = 250)
+mel.lps <- FindVariableFeatures(mel.lps, assay = "AUC", selection.method = "disp", nfeatures = 500)
 # mel.lps@assays$AUC@scale.data <- GetAssayData(mel.lps, slot = "data")[VariableFeatures(mel.lps),]
 mel.lps <- ScaleData(mel.lps, do.scale = FALSE, do.center = TRUE)
 mel.lps <- RunPCA(mel.lps, reduction.name = "pca.scenic", reduction.key = "PCAscenic_")
 mel.lps <- FindNeighbors(mel.lps, reduction = "pca.scenic")
-res = 0.3
+res = 0.25
 mel.lps <- FindClusters(mel.lps, graph.name = "AUC_snn", resolution = res)
 mel.lps <- RunUMAP(mel.lps, features = rownames(mel.lps), reduction = "pca.scenic", umap.method = "umap-learn", reduction.name = "umap.scenic", reduction.key = "UMAPscenic_")
 DimPlot(mel.lps, reduction = "umap.scenic", group.by = paste0("AUC_snn_res.",res)) | DimPlot(mel.lps, reduction = "umap.scenic", group.by = "state")
-mel.lps <- RenameIdents(mel.lps, `0` = "Healthy", `1` = "Inflammation")
+mel.lps <- RenameIdents(mel.lps, `1` = "Healthy", `0` = "Inflammation")
 mel.lps$scenic_state <- factor(Idents(mel.lps), levels = c("Healthy","Inflammation"))
+aricode::ARI(mel.lps@meta.data |> pull("state"), mel.lps@meta.data |> pull("scenic_state"))
 for (s in levels(mel.lps$scenic_state)){
   hpcs.lps <- SetIdent(object = hpcs.lps, cells = WhichCells(mel.lps, expression = scenic_state == s), value = s)
 }
@@ -146,7 +150,7 @@ for (s in levels(mel.lps$scenic_state)){
 ## Gonad
 gonad.lps <- subset(hpcs.lps, subset = cell_type_brief == "Gonad")
 DefaultAssay(gonad.lps) <- "AUC"
-gonad.lps <- FindVariableFeatures(gonad.lps, assay = "AUC", selection.method = "disp", nfeatures = 250)
+gonad.lps <- FindVariableFeatures(gonad.lps, assay = "AUC", selection.method = "disp", nfeatures = 500)
 # gonad.lps@assays$AUC@scale.data <- GetAssayData(gonad.lps, slot = "data")[VariableFeatures(gonad.lps),]
 gonad.lps <- ScaleData(gonad.lps, do.scale = FALSE, do.center = TRUE)
 gonad.lps <- RunPCA(gonad.lps, reduction.name = "pca.scenic", reduction.key = "PCAscenic_")
@@ -157,6 +161,7 @@ gonad.lps <- RunUMAP(gonad.lps, features = rownames(gonad.lps), reduction = "pca
 DimPlot(gonad.lps, reduction = "umap.scenic", group.by = paste0("AUC_snn_res.",res)) | DimPlot(gonad.lps, reduction = "umap.scenic", group.by = "state")
 gonad.lps <- RenameIdents(gonad.lps, `0` = "Healthy", `1` = "Inflammation")
 gonad.lps$scenic_state <- factor(Idents(gonad.lps), levels = c("Healthy","Inflammation"))
+aricode::ARI(gonad.lps@meta.data |> pull("state"), gonad.lps@meta.data |> pull("scenic_state"))
 for (s in levels(gonad.lps$scenic_state)){
   hpcs.lps <- SetIdent(object = hpcs.lps, cells = WhichCells(gonad.lps, expression = scenic_state == s), value = s)
 }
@@ -164,7 +169,7 @@ for (s in levels(gonad.lps$scenic_state)){
 ## Thyro
 thyro.lps <- subset(hpcs.lps, subset = cell_type_brief == "Thyro")
 DefaultAssay(thyro.lps) <- "AUC"
-thyro.lps <- FindVariableFeatures(thyro.lps, assay = "AUC", selection.method = "disp", nfeatures = 300)
+thyro.lps <- FindVariableFeatures(thyro.lps, assay = "AUC", selection.method = "disp", nfeatures = 800)
 # thyro.lps@assays$AUC@scale.data <- GetAssayData(thyro.lps, slot = "data")[VariableFeatures(thyro.lps),]
 thyro.lps <- ScaleData(thyro.lps, do.scale = FALSE, do.center = TRUE)
 thyro.lps <- RunPCA(thyro.lps, reduction.name = "pca.scenic", reduction.key = "PCAscenic_")
@@ -175,6 +180,7 @@ thyro.lps <- RunUMAP(thyro.lps, features = rownames(thyro.lps), reduction = "pca
 DimPlot(thyro.lps, reduction = "umap.scenic", group.by = paste0("AUC_snn_res.",res)) | DimPlot(thyro.lps, reduction = "umap.scenic", group.by = "state")
 thyro.lps <- RenameIdents(thyro.lps, `0` = "Healthy", `1` = "Inflammation")
 thyro.lps$scenic_state <- factor(Idents(thyro.lps), levels = c("Healthy","Inflammation"))
+aricode::ARI(thyro.lps@meta.data |> pull("state"), thyro.lps@meta.data |> pull("scenic_state"))
 for (s in levels(thyro.lps$scenic_state)){
   hpcs.lps <- SetIdent(object = hpcs.lps, cells = WhichCells(thyro.lps, expression = scenic_state == s), value = s)
 }

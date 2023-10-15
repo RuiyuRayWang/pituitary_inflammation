@@ -79,7 +79,7 @@ cells.new <- RenameAssays(cells.new, originalexp = "RNA")
 cells.new[["ident"]] <- NULL
 
 ## Parse metadata
-meta <- read.csv('misc/metadata.csv')
+meta <- read.csv('miscs/metadata.csv')
 for (ident in names(meta)[2:ncol(meta)]){
   print(paste0("Parsing ",ident,"..."))
   Idents(cells.new) <- "library"

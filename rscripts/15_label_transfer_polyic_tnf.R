@@ -36,32 +36,33 @@ query.hpcs <- MapQuery(
 hpcs.lps$state <- factor(hpcs.lps$state, levels = c("Healthy","Inflammation"))
 hpcs.lps$cell_type_brief <- factor(hpcs.lps$cell_type_brief, levels = c("Som", "Lac", "Cort", "Mel", "Gonad", "Thyro"))
 query.hpcs$predicted.state <- factor(query.hpcs$predicted.state, levels = c("Healthy","Inflammation"))
+query.hpcs$state <- query.hpcs$predicted.state
 
-p1 <- Embeddings(object = hpcs.lps, reduction = "umap") |>
-  as.data.frame() |>
-  rownames_to_column("cell_id") |>
-  left_join(y = FetchData(object = hpcs.lps, vars = c("id","state")) |> rownames_to_column("cell_id"), by = "cell_id") |>
-  column_to_rownames("cell_id") |>
-  bind_rows(
-    Embeddings(object = query.hpcs, reduction = "ref.umap") |>
-      as.data.frame() |>
-      rename(UMAP_1 = refUMAP_1, UMAP_2 = refUMAP_2) |>
-      rownames_to_column("cell_id") |>
-      left_join(y = FetchData(object = query.hpcs, vars = c("id","predicted.state")) |> rownames_to_column("cell_id"), by = "cell_id") |>
-      rename(state = predicted.state) |>
-      column_to_rownames("cell_id")
-  ) |>
-  unite(col = "id_state", id, state, sep = "_") |>
-  ggplot(mapping = aes(x = UMAP_1, y = UMAP_2)) +
-  geom_point(aes(color = id_state, size = id_state)) +
-  scale_color_manual(values = brewer.pal(12,"Paired")[c(2,8,1,7)]) +
-  scale_size_manual(values = c(1,1,.5,.5)) +
-  theme_dr(xlength = .16, ylength = .16) +
-  theme(
-    legend.position = "none",
-    axis.title = element_text(hjust = 0)
-  )
-ggsave(filename = "p1.eps", plot = p1, device = "eps", path = "../figures/FigS2/", width = 6, height = 6, dpi = 300, family = "Arial")
+# p1 <- Embeddings(object = hpcs.lps, reduction = "umap") |>
+#   as.data.frame() |>
+#   rownames_to_column("cell_id") |>
+#   left_join(y = FetchData(object = hpcs.lps, vars = c("id","state")) |> rownames_to_column("cell_id"), by = "cell_id") |>
+#   column_to_rownames("cell_id") |>
+#   bind_rows(
+#     Embeddings(object = query.hpcs, reduction = "ref.umap") |>
+#       as.data.frame() |>
+#       rename(UMAP_1 = refUMAP_1, UMAP_2 = refUMAP_2) |>
+#       rownames_to_column("cell_id") |>
+#       left_join(y = FetchData(object = query.hpcs, vars = c("id","predicted.state")) |> rownames_to_column("cell_id"), by = "cell_id") |>
+#       rename(state = predicted.state) |>
+#       column_to_rownames("cell_id")
+#   ) |>
+#   unite(col = "id_state", id, state, sep = "_") |>
+#   ggplot(mapping = aes(x = UMAP_1, y = UMAP_2)) +
+#   geom_point(aes(color = id_state, size = id_state)) +
+#   scale_color_manual(values = brewer.pal(12,"Paired")[c(2,8,1,7)]) +
+#   scale_size_manual(values = c(1,1,.5,.5)) +
+#   theme_dr(xlength = .16, ylength = .16) +
+#   theme(
+#     legend.position = "none",
+#     axis.title = element_text(size = 15, hjust = 0)
+#   )
+# ggsave(filename = "p1.eps", plot = p1, device = "eps", path = "../figures/FigS2/", width = 6, height = 6, dpi = 300, family = "Arial")
 
 hpcs.merged <- merge(hpcs.lps, query.hpcs)
 p2 <- Embeddings(object = hpcs.lps, reduction = "umap") |>
@@ -148,3 +149,128 @@ ggsave(filename = "p4.eps", plot = p4, device = "eps", path = "../figures/FigS2/
 
 p4 |>
   ggexport(filename = "../figures/polyic_tnf_barproportion.pdf", width = 6, height = 6.4)
+
+p5 <- Embeddings(object = hpcs.lps, reduction = "umap") |>
+  as.data.frame() |>
+  rownames_to_column("cell_id") |>
+  left_join(y = FetchData(object = hpcs.lps, vars = c("id","state","treat")) |> rownames_to_column("cell_id"), by = "cell_id") |>
+  column_to_rownames("cell_id") |>
+  bind_rows(
+    Embeddings(object = query.hpcs, reduction = "ref.umap") |>
+      as.data.frame() |>
+      rename(UMAP_1 = refUMAP_1, UMAP_2 = refUMAP_2) |>
+      rownames_to_column("cell_id") |>
+      left_join(y = FetchData(object = query.hpcs, vars = c("id","predicted.state","treat")) |> rownames_to_column("cell_id"), by = "cell_id") |>
+      rename(state = predicted.state) |>
+      column_to_rownames("cell_id")
+  ) |>
+  mutate(treat = factor(treat, levels = c("Saline","LPS","Poly(i:c)","TNFalpha"))) |>
+  ggplot(mapping = aes(x = UMAP_1, y = UMAP_2)) +
+  geom_point(aes(color = treat), size = 1) +
+  scale_color_manual(values = brewer.pal(12,"Paired")[c(9,5,4,12)]) +
+  theme_dr(xlength = .16, ylength = .16) +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 15, hjust = 0)
+  )
+ggsave(filename = "p5.eps", plot = p5, device = "eps", path = "../figures/FigS2/", width = 6, height = 6, dpi = 300, family = "Arial")
+
+hpcs.merged <- merge(hpcs.lps, query.hpcs)
+p6 <- Embeddings(object = hpcs.lps, reduction = "umap") |>
+  as.data.frame() |>
+  rownames_to_column("cell_id") |>
+  left_join(y = FetchData(object = hpcs.lps, vars = c("id","cell_type_brief")) |> rownames_to_column("cell_id"), by = "cell_id") |>
+  column_to_rownames("cell_id") |>
+  bind_rows(
+    Embeddings(object = query.hpcs, reduction = "ref.umap") |>
+      as.data.frame() |>
+      rename(UMAP_1 = refUMAP_1, UMAP_2 = refUMAP_2) |>
+      rownames_to_column("cell_id") |>
+      left_join(y = FetchData(object = query.hpcs, vars = c("id","cell_type_brief")) |> rownames_to_column("cell_id"), by = "cell_id") |>
+      column_to_rownames("cell_id")
+  ) |>
+  mutate(cell_type_brief = factor(cell_type_brief, levels = c("Som","Lac","Cort","Mel","Gonad","Thyro"))) |>
+  ggplot(mapping = aes(x = UMAP_1, y = UMAP_2)) +
+  geom_point(aes(color = cell_type_brief, size = id)) +
+  ggtitle("Cell types") +
+  scale_color_manual(values = scales::hue_pal()(13)[c(1,2,9,6,10,13)]) +
+  scale_size_manual(values = c(1, .2)) +
+  theme_dr() +
+  theme(
+    legend.position = "none",
+    panel.border = element_rect(fill = NA, color = "#696969"),
+    axis.line.x.bottom = element_blank(),
+    axis.line.y.left = element_blank(),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+  )
+p6 = LabelClusters(plot = p6, id = "cell_type_brief", box = T)
+ggsave(filename = "p6.eps", plot = p6, device = "eps", path = "../figures/FigS2/", width = 3, height = 3, dpi = 300, family = "Arial")
+
+p7 <- Embeddings(object = query.hpcs, reduction = "ref.umap") |>
+  as.data.frame() |>
+  rename(UMAP_1 = refUMAP_1, UMAP_2 = refUMAP_2) |>
+  rownames_to_column("cell_id") |>
+  left_join(y = FetchData(object = query.hpcs, vars = c("id","stim")) |> rownames_to_column("cell_id"), by = "cell_id") |>
+  column_to_rownames("cell_id") |>
+  mutate(labels = recode(stim, `Poly(i:c) >3w`="Poly(i:c) > 3w", `Poly(i:c) 10mg 3h`="Poly(i:c) 10mg/kg 3h", `Poly(i:c) 10mg 6h`="Poly(i:c) 10mg/kg 6h",
+                         `Poly(i:c) 20mg 3h`="Poly(i:c) 20mg/kg 3h", `Poly(i:c) 20mg 6h`="Poly(i:c) 20mg/kg 6h", `TNFalpha 500ug 6h`="TNF-α 500ug/kg 6h")) |>
+  mutate(labels = factor(labels, levels = c("Poly(i:c) > 3w","Poly(i:c) 10mg/kg 3h","Poly(i:c) 10mg/kg 6h","Poly(i:c) 20mg/kg 3h","Poly(i:c) 20mg/kg 6h","TNF-α 500ug/kg 6h"))) |>
+  ggplot(mapping = aes(x = UMAP_1, y = UMAP_2)) +
+  geom_point(aes(color = labels), size = .8) +
+  ggtitle("Treatments") +
+  scale_color_manual(values = brewer.pal(8,"Dark2")[1:6]) +
+  theme_dr() +
+  theme(
+    legend.position = "none",
+    panel.border = element_rect(fill = NA, color = "#696969"),
+    axis.line.x.bottom = element_blank(),
+    axis.line.y.left = element_blank(),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+  )
+p7 = LabelClusters(plot = p7, id = "labels", box = T, size = 3)
+ggsave(filename = "p7.eps", plot = p7, device = "eps", path = "../figures/FigS2/", width = 3, height = 3, dpi = 300, family = "Arial")
+
+library(ggalluvial)
+df1 <- hpcs.merged@meta.data |> 
+  filter(treat %in% c("Saline","LPS")) |>
+  group_by(cell_type_brief, stim, state) |>
+  summarise(freq = n()) |>
+  ungroup()
+df1$cell_type_brief <- factor(df1$cell_type_brief, levels = c("Som", "Lac", "Cort", "Mel", "Gonad", "Thyro"))
+df1$stim <- factor(df1$stim, levels = c("Ctrl","LPS 500ug 3h","LPS 500ug 6h","LPS 500ug 1d","LPS 500ug 2d",
+                                        "LPS 10mg 3h","LPS 10mg 6h","LPS 50mg 3h","LPS 50mg 6h","LPS >3w"))
+
+pdf(file = "../figures/FigS2/p8.pdf", width = 6, height = 8, family = "ArialMT")
+df1 |> ggplot(aes(axis1 = stim, axis2 = state, y = freq)) +
+  geom_alluvium(aes(fill = cell_type_brief)) +
+  geom_stratum() +
+  geom_text(stat = "stratum",
+            aes(label = after_stat(stratum))) +
+  scale_fill_manual(values = scales::hue_pal()(13)[c(1,2,9,6,10,13)]) +
+  theme_void()
+dev.off()
+
+
+df2 <- hpcs.merged@meta.data |> 
+  filter(treat %in% c("Poly(i:c)","TNFalpha")) |>
+  group_by(cell_type_brief, stim, state) |>
+  summarise(freq = n()) |>
+  ungroup()
+
+df2$cell_type_brief <- factor(df2$cell_type_brief, levels = c("Som", "Lac", "Cort", "Mel", "Gonad", "Thyro"))
+df2$stim <- factor(df2$stim, levels = c("Poly(i:c) 10mg 3h","Poly(i:c) 10mg 6h","Poly(i:c) 20mg 3h","Poly(i:c) 20mg 6h","Poly(i:c) >3w","TNFalpha 500ug 6h"))
+
+pdf(file = "../figures/FigS2/p9.pdf", width = 6, height = 8, family = "ArialMT")
+df2 |> ggplot(aes(axis1 = stim, axis2 = state, y = freq)) +
+  geom_alluvium(aes(fill = cell_type_brief)) +
+  geom_stratum() +
+  geom_text(stat = "stratum",
+            aes(label = after_stat(stratum))) +
+  scale_fill_manual(values = scales::hue_pal()(13)[c(1,2,9,6,10,13)]) +
+  theme_void()
+dev.off()
+
